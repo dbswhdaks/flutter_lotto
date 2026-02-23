@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/treasure_result.dart';
+import '../services/sound_service.dart';
 import 'treasure_ai_page.dart';
 
 class TreasurePage extends StatefulWidget {
@@ -21,6 +22,7 @@ class _TreasurePageState extends State<TreasurePage>
   int? _revealedTreasure;
   final List<TreasureResult> _history = [];
   bool _showConfetti = false;
+  final SoundService _sound = SoundService();
 
   late final List<AnimationController> _ballControllers;
   late AnimationController _treasureController;
@@ -29,6 +31,8 @@ class _TreasurePageState extends State<TreasurePage>
   @override
   void initState() {
     super.initState();
+    _sound.init();
+    _sound.setGameType(GameType.treasure);
     _ballControllers = List.generate(
       6,
       (_) => AnimationController(
@@ -76,25 +80,30 @@ class _TreasurePageState extends State<TreasurePage>
       _currentResult = TreasureResult.generate(_drawCount);
     });
 
+    _sound.playStart();
     _glowController.repeat(reverse: true);
     await Future.delayed(const Duration(milliseconds: 400));
 
     for (int i = 0; i < 6; i++) {
       if (!mounted) return;
+      _sound.playBounce();
       _ballControllers[i].forward(from: 0);
       await Future.delayed(const Duration(milliseconds: 180));
       if (!mounted) return;
       setState(() => _revealedNumbers.add(_currentResult!.numbers[i]));
+      _sound.playBall(i);
       await Future.delayed(const Duration(milliseconds: 150));
     }
 
     await Future.delayed(const Duration(milliseconds: 500));
     if (!mounted) return;
 
+    _sound.playWhoosh();
     _treasureController.forward(from: 0);
     await Future.delayed(const Duration(milliseconds: 200));
     if (!mounted) return;
     setState(() => _revealedTreasure = _currentResult!.treasureNumber);
+    _sound.playSpecial();
 
     await Future.delayed(const Duration(milliseconds: 400));
     if (!mounted) return;
@@ -102,6 +111,7 @@ class _TreasurePageState extends State<TreasurePage>
     _glowController.stop();
     _glowController.value = 0;
 
+    _sound.playComplete();
     setState(() {
       _isDrawing = false;
       _showConfetti = true;

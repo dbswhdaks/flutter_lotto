@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/powerball_result.dart';
+import '../services/sound_service.dart';
 import 'powerball_ai_page.dart';
 
 class PowerballPage extends StatefulWidget {
@@ -21,6 +22,7 @@ class _PowerballPageState extends State<PowerballPage>
   bool _showPowerball = false;
   final List<PowerballResult> _history = [];
   bool _showConfetti = false;
+  final SoundService _sound = SoundService();
 
   late final List<AnimationController> _ballControllers;
   late final AnimationController _powerballController;
@@ -29,6 +31,8 @@ class _PowerballPageState extends State<PowerballPage>
   @override
   void initState() {
     super.initState();
+    _sound.init();
+    _sound.setGameType(GameType.powerball);
     _ballControllers = List.generate(
       5,
       (_) => AnimationController(
@@ -68,25 +72,30 @@ class _PowerballPageState extends State<PowerballPage>
       _currentResult = PowerballResult.generate(_drawCount);
     });
 
+    _sound.playStart();
     _glowController.repeat(reverse: true);
     await Future.delayed(const Duration(milliseconds: 400));
 
     for (int i = 0; i < 5; i++) {
       if (!mounted) return;
+      _sound.playBounce();
       _ballControllers[i].forward(from: 0);
       await Future.delayed(const Duration(milliseconds: 250));
       if (!mounted) return;
       setState(() => _revealedNumbers.add(_currentResult!.numbers[i]));
+      _sound.playBall(i);
       await Future.delayed(const Duration(milliseconds: 150));
     }
 
     await Future.delayed(const Duration(milliseconds: 400));
     if (!mounted) return;
 
+    _sound.playWhoosh();
     _powerballController.forward(from: 0);
     await Future.delayed(const Duration(milliseconds: 400));
     if (!mounted) return;
     setState(() => _showPowerball = true);
+    _sound.playSpecial();
 
     await Future.delayed(const Duration(milliseconds: 300));
     if (!mounted) return;
@@ -94,6 +103,7 @@ class _PowerballPageState extends State<PowerballPage>
     _glowController.stop();
     _glowController.value = 0;
 
+    _sound.playComplete();
     setState(() {
       _isDrawing = false;
       _showConfetti = true;
@@ -495,84 +505,7 @@ class _PowerballPageState extends State<PowerballPage>
       );
     }
 
-    final allRevealed = _revealedNumbers.length == 5 && _showPowerball;
-    return AnimatedOpacity(
-      opacity: allRevealed ? 1.0 : 0.0,
-      duration: const Duration(milliseconds: 500),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 24),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: const LinearGradient(
-            colors: [Color(0xFFFF4757), Color(0xFFCC2936)],
-          ),
-          border: Border.all(
-            color: const Color(0xFFFF6B81).withValues(alpha: 0.4),
-            width: 1.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFFF4757).withValues(alpha: 0.35),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.bolt, color: Color(0xFFFFD700), size: 20),
-              const SizedBox(width: 6),
-              ...List.generate(5, (i) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 3),
-                  child: Text(
-                    '${_currentResult!.numbers[i]}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                );
-              }),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 6),
-                child: Text(
-                  '+',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFD700),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  'P ${_currentResult!.powerball}',
-                  style: const TextStyle(
-                    color: Color(0xFF1A1A2E),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 6),
-              const Icon(Icons.bolt, color: Color(0xFFFFD700), size: 20),
-            ],
-          ),
-        ),
-      ),
-    );
+    return const SizedBox.shrink();
   }
 
   Widget _buildButtons() {

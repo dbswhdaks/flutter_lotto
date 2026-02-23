@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/catchme_result.dart';
+import '../services/sound_service.dart';
 import 'catchme_ai_page.dart';
 
 class CatchmePage extends StatefulWidget {
@@ -21,6 +22,7 @@ class _CatchmePageState extends State<CatchmePage>
   bool _revealed = false;
   final List<CatchmeResult> _history = [];
   bool _showConfetti = false;
+  final SoundService _sound = SoundService();
 
   late AnimationController _revealController;
   late AnimationController _glowController;
@@ -29,6 +31,8 @@ class _CatchmePageState extends State<CatchmePage>
   @override
   void initState() {
     super.initState();
+    _sound.init();
+    _sound.setGameType(GameType.catchme);
     _revealController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
@@ -71,11 +75,12 @@ class _CatchmePageState extends State<CatchmePage>
           CatchmeResult.generate(_drawCount, _selectedNumber!);
     });
 
+    _sound.playStart();
     _glowController.repeat(reverse: true);
 
-    // 스피닝 효과: 랜덤 번호 빠르게 보여주기
     for (int i = 0; i < 15; i++) {
       if (!mounted) return;
+      if (i % 3 == 0) _sound.playBounce();
       setState(() {});
       await Future.delayed(Duration(milliseconds: 80 + i * 20));
     }
@@ -85,17 +90,20 @@ class _CatchmePageState extends State<CatchmePage>
 
     _glowController.stop();
     _glowController.value = 0;
+    _sound.playWhoosh();
     _revealController.forward(from: 0);
 
     setState(() => _revealed = true);
 
     if (_currentResult!.isMatch) {
+      _sound.playHit();
       _pulseController.repeat(reverse: true);
       setState(() => _showConfetti = true);
       await Future.delayed(const Duration(milliseconds: 3000));
       _pulseController.stop();
       _pulseController.value = 0;
     } else {
+      _sound.playMiss();
       await Future.delayed(const Duration(milliseconds: 1500));
     }
 

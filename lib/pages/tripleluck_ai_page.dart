@@ -105,6 +105,14 @@ class _TripleluckAiPageState extends State<TripleluckAiPage>
     );
   }
 
+  static const _strategyColors = [
+    Color(0xFFFF6D00), // 핫번호 중심 – 오렌지
+    Color(0xFF40C4FF), // 콜드번호 포함 – 아이스블루
+    Color(0xFFEEFF41), // 핫+장기미출현 – 라임
+    Color(0xFFE040FB), // 포지션 빈도 – 퍼플
+    Color(0xFF69F0AE), // 빈도가중 랜덤 – 민트
+  ];
+
   // ── 탭 1: AI 추천 ──
   Widget _buildRecommendationTab() {
     final a = _analysis!;
@@ -121,7 +129,13 @@ class _TripleluckAiPageState extends State<TripleluckAiPage>
                 color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
           ),
           const SizedBox(height: 16),
-          ...a.recommendations.map((rec) => _buildRecCard(rec)),
+          ...List.generate(a.recommendations.length, (i) {
+            return _buildRecCard(
+              rec: a.recommendations[i],
+              index: i,
+              accent: _strategyColors[i % _strategyColors.length],
+            );
+          }),
           const SizedBox(height: 16),
           Center(
             child: ElevatedButton.icon(
@@ -148,57 +162,125 @@ class _TripleluckAiPageState extends State<TripleluckAiPage>
     );
   }
 
-  Widget _buildRecCard(TripleluckRecommendation rec) {
+  Widget _buildRecCard({
+    required TripleluckRecommendation rec,
+    required int index,
+    required Color accent,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
           colors: [
-            Colors.white.withValues(alpha: 0.08),
+            accent.withValues(alpha: 0.10),
             Colors.white.withValues(alpha: 0.03),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        border: Border.all(color: accent.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: const Color(0xFF00BCD4).withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              '${rec.icon} ${rec.strategy}',
-              style: const TextStyle(
-                color: Color(0xFF00E5FF),
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
+          // ── 헤더: 세트 번호 + 전략 뱃지 ──
+          Row(
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: accent.withValues(alpha: 0.2),
+                ),
+                child: Center(
+                  child: Text(
+                    '${index + 1}',
+                    style: TextStyle(
+                      color: accent,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(width: 10),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${rec.icon} ${rec.strategy}',
+                  style: TextStyle(
+                    color: accent,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
-          _setLabel('TRIPLE', const Color(0xFF00E5FF)),
-          const SizedBox(height: 6),
-          Wrap(
-            spacing: 8,
-            runSpacing: 6,
-            children: rec.tripleNumbers
-                .map((n) => _LuckBall(number: n, color: _ballColor(n)))
-                .toList(),
-          ),
-          const SizedBox(height: 10),
-          _setLabel('LUCK', const Color(0xFF76FF03)),
-          const SizedBox(height: 6),
-          Wrap(
-            spacing: 8,
-            runSpacing: 6,
-            children: rec.luckNumbers
-                .map((n) => _LuckBall(number: n, color: _ballColor(n)))
-                .toList(),
+          const SizedBox(height: 14),
+          // ── 번호: TRIPLE + LUCK 가로 정렬 ──
+          Row(
+            children: [
+              // TRIPLE 영역
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _setLabel('TRIPLE', const Color(0xFF00E5FF)),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: rec.tripleNumbers
+                          .map((n) => Padding(
+                                padding: const EdgeInsets.only(right: 6),
+                                child: _LuckBall(
+                                    number: n,
+                                    color: _ballColor(n),
+                                    size: 34),
+                              ))
+                          .toList(),
+                    ),
+                  ],
+                ),
+              ),
+              // 구분선
+              Container(
+                width: 1,
+                height: 52,
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                color: Colors.white.withValues(alpha: 0.12),
+              ),
+              // LUCK 영역
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _setLabel('LUCK', const Color(0xFF76FF03)),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: rec.luckNumbers
+                          .map((n) => Padding(
+                                padding: const EdgeInsets.only(right: 6),
+                                child: _LuckBall(
+                                    number: n,
+                                    color: _ballColor(n),
+                                    size: 34),
+                              ))
+                          .toList(),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),

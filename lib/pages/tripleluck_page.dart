@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/tripleluck_result.dart';
+import '../services/sound_service.dart';
 import 'tripleluck_ai_page.dart';
 
 class TripleluckPage extends StatefulWidget {
@@ -21,6 +22,7 @@ class _TripleluckPageState extends State<TripleluckPage>
   final List<int> _revealedLuck = [];
   final List<TripleluckResult> _history = [];
   bool _showConfetti = false;
+  final SoundService _sound = SoundService();
 
   late final List<AnimationController> _tripleControllers;
   late final List<AnimationController> _luckControllers;
@@ -29,6 +31,8 @@ class _TripleluckPageState extends State<TripleluckPage>
   @override
   void initState() {
     super.initState();
+    _sound.init();
+    _sound.setGameType(GameType.tripleluck);
     _tripleControllers = List.generate(
       3,
       (_) => AnimationController(
@@ -79,29 +83,32 @@ class _TripleluckPageState extends State<TripleluckPage>
       _currentResult = TripleluckResult.generate(_drawCount);
     });
 
+    _sound.playStart();
     _glowController.repeat(reverse: true);
     await Future.delayed(const Duration(milliseconds: 400));
 
-    // 트리플 3개 공개
     for (int i = 0; i < 3; i++) {
       if (!mounted) return;
+      _sound.playBounce();
       _tripleControllers[i].forward(from: 0);
       await Future.delayed(const Duration(milliseconds: 200));
       if (!mounted) return;
       setState(
           () => _revealedTriple.add(_currentResult!.tripleNumbers[i]));
+      _sound.playBall(i);
       await Future.delayed(const Duration(milliseconds: 200));
     }
 
     await Future.delayed(const Duration(milliseconds: 400));
 
-    // 럭 3개 공개
     for (int i = 0; i < 3; i++) {
       if (!mounted) return;
+      _sound.playBounce();
       _luckControllers[i].forward(from: 0);
       await Future.delayed(const Duration(milliseconds: 200));
       if (!mounted) return;
       setState(() => _revealedLuck.add(_currentResult!.luckNumbers[i]));
+      _sound.playBall(i + 3);
       await Future.delayed(const Duration(milliseconds: 200));
     }
 
@@ -111,6 +118,7 @@ class _TripleluckPageState extends State<TripleluckPage>
     _glowController.stop();
     _glowController.value = 0;
 
+    _sound.playComplete();
     setState(() {
       _isDrawing = false;
       _showConfetti = true;

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/speedkino_result.dart';
+import '../services/sound_service.dart';
 import 'speedkino_ai_page.dart';
 
 class SpeedkinoPage extends StatefulWidget {
@@ -20,6 +21,7 @@ class _SpeedkinoPageState extends State<SpeedkinoPage>
   final List<int> _revealedNumbers = [];
   final List<SpeedkinoResult> _history = [];
   bool _showConfetti = false;
+  final SoundService _sound = SoundService();
 
   late final List<AnimationController> _ballControllers;
   late final AnimationController _glowController;
@@ -27,6 +29,8 @@ class _SpeedkinoPageState extends State<SpeedkinoPage>
   @override
   void initState() {
     super.initState();
+    _sound.init();
+    _sound.setGameType(GameType.speedkino);
     _ballControllers = List.generate(
       10,
       (_) => AnimationController(
@@ -60,15 +64,18 @@ class _SpeedkinoPageState extends State<SpeedkinoPage>
       _currentResult = SpeedkinoResult.generate(_drawCount);
     });
 
+    _sound.playStart();
     _glowController.repeat(reverse: true);
     await Future.delayed(const Duration(milliseconds: 300));
 
     for (int i = 0; i < 10; i++) {
       if (!mounted) return;
+      _sound.playBounce();
       _ballControllers[i].forward(from: 0);
       await Future.delayed(const Duration(milliseconds: 150));
       if (!mounted) return;
       setState(() => _revealedNumbers.add(_currentResult!.numbers[i]));
+      _sound.playBall(i % 7);
       await Future.delayed(const Duration(milliseconds: 100));
     }
 
@@ -78,6 +85,7 @@ class _SpeedkinoPageState extends State<SpeedkinoPage>
     _glowController.stop();
     _glowController.value = 0;
 
+    _sound.playComplete();
     setState(() {
       _isDrawing = false;
       _showConfetti = true;

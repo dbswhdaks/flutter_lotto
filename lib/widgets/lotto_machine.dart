@@ -40,15 +40,20 @@ class LottoMachineState extends State<LottoMachine>
     final s = widget.sphereSize;
     final cx = s / 2;
     final cy = s / 2;
-    _balls = List.generate(14, (_) {
-      final n = _random.nextInt(45) + 1;
+    final usedNumbers = <int>{};
+    _balls = List.generate(28, (_) {
+      int n;
+      do {
+        n = _random.nextInt(45) + 1;
+      } while (usedNumbers.contains(n));
+      usedNumbers.add(n);
       final angle = _random.nextDouble() * pi * 2;
-      final r = _random.nextDouble() * s * 0.22;
+      final r = _random.nextDouble() * s * 0.25;
       return BallPhysics(
         x: cx + cos(angle) * r,
-        y: cy + sin(angle) * r + s * 0.15,
+        y: cy + sin(angle) * r + s * 0.12,
         number: n,
-        radius: 16,
+        radius: 13,
       );
     });
   }

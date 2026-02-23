@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'lotto_home_page.dart';
 import 'pension_page.dart';
@@ -287,14 +288,26 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   Widget _buildTitle() {
     return Column(
       children: [
-        const Text(
-          '🎯 동행복권 생성기',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 28,
-            fontWeight: FontWeight.w900,
-            letterSpacing: -0.5,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(width: 32),
+            const Text(
+              '🎯 동행복권 생성기',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 28,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.5,
+              ),
+            ),
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: _buildShareButton(),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         Text(
@@ -306,6 +319,36 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildShareButton() {
+    return GestureDetector(
+      onTap: () {
+        SharePlus.instance.share(
+          ShareParams(
+            text:
+                '🎯 동행복권 생성기로 행운의 번호를 뽑아보세요!\n'
+                '로또 6/45, 연금복권, 파워볼 등 다양한 복권 번호를 AI가 추천해드립니다.',
+          ),
+        );
+      },
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white.withValues(alpha: 0.1),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.2),
+          ),
+        ),
+        child: Icon(
+          Icons.share_rounded,
+          color: Colors.white.withValues(alpha: 0.8),
+          size: 20,
+        ),
+      ),
     );
   }
 

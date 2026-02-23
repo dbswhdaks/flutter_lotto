@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/pension_result.dart';
+import '../services/sound_service.dart';
 import 'pension_ai_page.dart';
 
 class PensionPage extends StatefulWidget {
@@ -21,6 +22,7 @@ class _PensionPageState extends State<PensionPage>
   final List<bool> _digitRevealed = List.filled(6, false);
   final List<PensionResult> _history = [];
   bool _showConfetti = false;
+  final SoundService _sound = SoundService();
 
   late final List<AnimationController> _slotControllers;
   late final AnimationController _groupController;
@@ -29,6 +31,8 @@ class _PensionPageState extends State<PensionPage>
   @override
   void initState() {
     super.initState();
+    _sound.init();
+    _sound.setGameType(GameType.pension);
     _slotControllers = List.generate(
       6,
       (_) => AnimationController(
@@ -70,23 +74,28 @@ class _PensionPageState extends State<PensionPage>
       _currentResult = PensionResult.generate(_drawCount);
     });
 
+    _sound.playStart();
     _glowController.repeat(reverse: true);
 
     await Future.delayed(const Duration(milliseconds: 400));
 
+    _sound.playBounce();
     _groupController.forward(from: 0);
     await Future.delayed(const Duration(milliseconds: 500));
     if (!mounted) return;
     setState(() => _groupRevealed = true);
+    _sound.playBall(0);
 
     await Future.delayed(const Duration(milliseconds: 300));
 
     for (int i = 0; i < 6; i++) {
       if (!mounted) return;
+      _sound.playBounce();
       _slotControllers[i].forward(from: 0);
       await Future.delayed(const Duration(milliseconds: 200));
       if (!mounted) return;
       setState(() => _digitRevealed[i] = true);
+      _sound.playBall((i + 1) % 7);
       await Future.delayed(const Duration(milliseconds: 150));
     }
 
@@ -96,6 +105,7 @@ class _PensionPageState extends State<PensionPage>
     _glowController.stop();
     _glowController.value = 0;
 
+    _sound.playComplete();
     setState(() {
       _isDrawing = false;
       _showConfetti = true;
@@ -399,54 +409,7 @@ class _PensionPageState extends State<PensionPage>
       );
     }
 
-    final allRevealed = _digitRevealed.every((r) => r) && _groupRevealed;
-
-    return AnimatedOpacity(
-      opacity: allRevealed ? 1.0 : 0.0,
-      duration: const Duration(milliseconds: 500),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 24),
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: const LinearGradient(
-            colors: [Color(0xFFE8446A), Color(0xFFC42B50)],
-          ),
-          border: Border.all(
-            color: const Color(0xFFFF7A9A).withValues(alpha: 0.4),
-            width: 1.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFE94560).withValues(alpha: 0.35),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.star, color: Color(0xFFFFD700), size: 20),
-              const SizedBox(width: 8),
-              Text(
-                _currentResult!.fullDisplay,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 2,
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Icon(Icons.star, color: Color(0xFFFFD700), size: 20),
-            ],
-          ),
-        ),
-      ),
-    );
+    return const SizedBox.shrink();
   }
 
   Widget _buildButtons() {

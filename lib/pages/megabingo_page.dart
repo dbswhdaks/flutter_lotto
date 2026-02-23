@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/megabingo_result.dart';
+import '../services/sound_service.dart';
 import 'megabingo_ai_page.dart';
 
 class MegabingoPage extends StatefulWidget {
@@ -21,6 +22,7 @@ class _MegabingoPageState extends State<MegabingoPage>
   int _revealIndex = 0;
   final List<MegabingoResult> _history = [];
   bool _showConfetti = false;
+  final SoundService _sound = SoundService();
 
   late AnimationController _glowController;
   late AnimationController _bingoFlashController;
@@ -28,6 +30,8 @@ class _MegabingoPageState extends State<MegabingoPage>
   @override
   void initState() {
     super.initState();
+    _sound.init();
+    _sound.setGameType(GameType.megabingo);
     _glowController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
@@ -57,16 +61,18 @@ class _MegabingoPageState extends State<MegabingoPage>
       _currentResult = MegabingoResult.generate(_drawCount);
     });
 
+    _sound.playStart();
     _glowController.repeat(reverse: true);
     await Future.delayed(const Duration(milliseconds: 400));
 
-    // 20개 번호를 하나씩 공개
     for (int i = 0; i < 20; i++) {
       if (!mounted) return;
+      _sound.playBounce();
       setState(() {
         _revealedDrawn.add(_currentResult!.drawnNumbers[i]);
         _revealIndex = i + 1;
       });
+      _sound.playBall(i % 7);
       await Future.delayed(const Duration(milliseconds: 180));
     }
 
@@ -76,14 +82,15 @@ class _MegabingoPageState extends State<MegabingoPage>
     _glowController.stop();
     _glowController.value = 0;
 
-    // 빙고 라인이 있으면 플래시
     if (_currentResult!.bingoCount > 0) {
+      _sound.playHit();
       _bingoFlashController.repeat(reverse: true);
       await Future.delayed(const Duration(milliseconds: 1200));
       _bingoFlashController.stop();
       _bingoFlashController.value = 0;
     }
 
+    _sound.playComplete();
     setState(() {
       _isDrawing = false;
       _showConfetti = _currentResult!.bingoCount > 0;

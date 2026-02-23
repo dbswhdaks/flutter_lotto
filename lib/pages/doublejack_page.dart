@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/doublejack_result.dart';
+import '../services/sound_service.dart';
 import 'doublejack_ai_page.dart';
 
 class DoublejackPage extends StatefulWidget {
@@ -21,6 +22,7 @@ class _DoublejackPageState extends State<DoublejackPage>
   final List<int> _revealedMidas = [];
   final List<DoublejackResult> _history = [];
   bool _showConfetti = false;
+  final SoundService _sound = SoundService();
 
   late final List<AnimationController> _jackControllers;
   late final List<AnimationController> _midasControllers;
@@ -29,6 +31,8 @@ class _DoublejackPageState extends State<DoublejackPage>
   @override
   void initState() {
     super.initState();
+    _sound.init();
+    _sound.setGameType(GameType.doublejack);
     _jackControllers = List.generate(
       6,
       (_) => AnimationController(
@@ -81,15 +85,18 @@ class _DoublejackPageState extends State<DoublejackPage>
       _currentResult = DoublejackResult.generate(_drawCount);
     });
 
+    _sound.playStart();
     _glowController.repeat(reverse: true);
     await Future.delayed(const Duration(milliseconds: 400));
 
     for (int i = 0; i < 6; i++) {
       if (!mounted) return;
+      _sound.playBounce();
       _jackControllers[i].forward(from: 0);
       await Future.delayed(const Duration(milliseconds: 150));
       if (!mounted) return;
       setState(() => _revealedJack.add(_currentResult!.jackNumbers[i]));
+      _sound.playBall(i);
       await Future.delayed(const Duration(milliseconds: 150));
     }
 
@@ -97,10 +104,12 @@ class _DoublejackPageState extends State<DoublejackPage>
 
     for (int i = 0; i < 6; i++) {
       if (!mounted) return;
+      _sound.playBounce();
       _midasControllers[i].forward(from: 0);
       await Future.delayed(const Duration(milliseconds: 150));
       if (!mounted) return;
       setState(() => _revealedMidas.add(_currentResult!.midasNumbers[i]));
+      _sound.playBall(i);
       await Future.delayed(const Duration(milliseconds: 150));
     }
 
@@ -110,6 +119,7 @@ class _DoublejackPageState extends State<DoublejackPage>
     _glowController.stop();
     _glowController.value = 0;
 
+    _sound.playComplete();
     setState(() {
       _isDrawing = false;
       _showConfetti = true;

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/lotto_result.dart';
+import '../services/sound_service.dart';
 import '../widgets/lotto_machine.dart';
 import '../widgets/result_panel.dart';
 import '../widgets/history_panel.dart';
@@ -27,9 +28,17 @@ class _LottoHomePageState extends State<LottoHomePage> {
   final List<LottoResult> _history = [];
   final GlobalKey<LottoMachineState> _machineKey = GlobalKey();
   final ScrollController _scrollController = ScrollController();
+  final SoundService _sound = SoundService();
 
   int? _travelingNumber;
   Completer<void>? _arrivalCompleter;
+
+  @override
+  void initState() {
+    super.initState();
+    _sound.init();
+    _sound.setGameType(GameType.lotto);
+  }
 
   static const double _sphereSize = 260;
   static const double _headerHeight = 80;
@@ -59,6 +68,8 @@ class _LottoHomePageState extends State<LottoHomePage> {
       _currentResult = LottoResult.generate(_drawCount);
     });
 
+    _sound.playStart();
+
     if (_scrollController.offset > 0) {
       await _scrollController.animateTo(
         0,
@@ -69,11 +80,15 @@ class _LottoHomePageState extends State<LottoHomePage> {
 
     await Future.delayed(const Duration(milliseconds: 400));
 
+    _sound.playMixing();
+
     for (int i = 0; i < 6; i++) {
+      _sound.playBounce();
       _machineKey.currentState?.boostBalls();
       await Future.delayed(const Duration(milliseconds: 300));
       if (!mounted) return;
 
+      _sound.playWhoosh();
       _arrivalCompleter = Completer<void>();
       setState(() {
         _travelingNumber = _currentResult!.mainNumbers[i];
@@ -81,6 +96,8 @@ class _LottoHomePageState extends State<LottoHomePage> {
 
       await _arrivalCompleter!.future;
       if (!mounted) return;
+
+      _sound.playBall(i);
 
       setState(() {
         _travelingNumber = null;
@@ -98,8 +115,12 @@ class _LottoHomePageState extends State<LottoHomePage> {
     });
 
     await Future.delayed(const Duration(milliseconds: 400));
-    _machineKey.currentState?.boostBalls();
 
+    _sound.playBounce();
+    _machineKey.currentState?.boostBalls();
+    await Future.delayed(const Duration(milliseconds: 200));
+
+    _sound.playWhoosh();
     _arrivalCompleter = Completer<void>();
     setState(() {
       _travelingNumber = _currentResult!.bonusNumber;
@@ -108,13 +129,19 @@ class _LottoHomePageState extends State<LottoHomePage> {
     await _arrivalCompleter!.future;
     if (!mounted) return;
 
+    _sound.playBall(6);
+
     setState(() {
       _travelingNumber = null;
       _showBonus = true;
     });
 
+    _sound.stopMixing();
+
     await Future.delayed(const Duration(milliseconds: 200));
     if (!mounted) return;
+
+    _sound.playComplete();
 
     setState(() {
       _isDrawing = false;
