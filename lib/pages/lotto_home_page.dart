@@ -40,7 +40,7 @@ class _LottoHomePageState extends State<LottoHomePage> {
     _sound.setGameType(GameType.lotto);
   }
 
-  static const double _sphereSize = 260;
+  static const double _sphereSize = 290;
   static const double _headerHeight = 80;
   static const double _machineAreaTop = _headerHeight;
   static const double _sphereScreenTop = _machineAreaTop + 50;
@@ -202,7 +202,7 @@ class _LottoHomePageState extends State<LottoHomePage> {
                 controller: _scrollController,
                 child: Column(
                   children: [
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 28),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Row(
@@ -224,7 +224,7 @@ class _LottoHomePageState extends State<LottoHomePage> {
                           ),
                           const Expanded(
                             child: Text(
-                              '🎱 6/45 로또 번호 추첨기',
+                              '🎱 6/45 로또 번호 생성기',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: Colors.white,
@@ -238,7 +238,7 @@ class _LottoHomePageState extends State<LottoHomePage> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 6),
                     Text(
                       '행운의 번호를 뽑아보세요!',
                       style: TextStyle(
@@ -246,32 +246,31 @@ class _LottoHomePageState extends State<LottoHomePage> {
                         fontSize: 13,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Center(
-                      child: LottoMachine(
-                        key: _machineKey,
-                        isSpinning: _isDrawing,
-                        sphereSize: _sphereSize,
-                      ),
+                    const SizedBox(height: 16),
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        LottoMachine(
+                          key: _machineKey,
+                          isSpinning: _isDrawing,
+                          sphereSize: _sphereSize,
+                        ),
+                        Positioned(
+                          right: (MediaQuery.of(context).size.width - _sphereSize) / 2 - 36,
+                          bottom: 40,
+                          child: _ResetButton(onPressed: _reset),
+                        ),
+                      ],
                     ),
                     Transform.translate(
                       offset: const Offset(0, -12),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(right: 4, bottom: 2),
-                              child: _ResetButton(onPressed: _reset),
-                            ),
-                            ResultPanel(
-                              result: _currentResult,
-                              revealedNumbers: _revealedNumbers,
-                              showPlus: _showPlus,
-                              showBonus: _showBonus,
-                            ),
-                          ],
+                        child: ResultPanel(
+                          result: _currentResult,
+                          revealedNumbers: _revealedNumbers,
+                          showPlus: _showPlus,
+                          showBonus: _showBonus,
                         ),
                       ),
                     ),
@@ -379,7 +378,7 @@ class _ActionButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           onTap: onPressed,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
+            padding: const EdgeInsets.symmetric(vertical: 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -442,9 +441,9 @@ class _DrawButton extends StatelessWidget {
               Icon(
                 isDrawing ? Icons.hourglass_top : Icons.casino,
                 color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
-                size: 28,
+                size: 24,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               Text(
                 isDrawing ? '추첨 중' : '추첨 시작',
                 style: TextStyle(
@@ -472,8 +471,8 @@ class _ResetButton extends StatelessWidget {
     return GestureDetector(
       onTap: onPressed,
       child: Container(
-        width: 44,
-        height: 44,
+        width: 46,
+        height: 46,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: Colors.black.withValues(alpha: 0.3),
@@ -485,7 +484,7 @@ class _ResetButton extends StatelessWidget {
         child: Icon(
           Icons.refresh,
           color: Colors.white.withValues(alpha: enabled ? 0.9 : 0.4),
-          size: 26,
+          size: 27,
         ),
       ),
     );
