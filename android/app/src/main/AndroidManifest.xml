@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="lotto_app"
+        android:label="동행복권 Plus"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

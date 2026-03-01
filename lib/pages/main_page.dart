@@ -275,6 +275,34 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                     ),
                     _buildFooter(),
                     const SizedBox(height: 16),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '※ 본 앱은 공식 동행복권 앱이 아니며 번호 추천 및 통계 참고',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.5),
+                              fontSize: 11,
+                              height: 1.4,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 10),
+                            child: Text(
+                              '용 앱입니다',
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.5),
+                                fontSize: 11,
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),
@@ -288,34 +316,60 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   Widget _buildTitle() {
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(width: 32),
-            const Text(
-              '🎯 동행복권 생성기',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 28,
-                fontWeight: FontWeight.w900,
-                letterSpacing: -0.5,
+        SizedBox(
+          height: 48,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 40,
+                height: 40,
+                child: Center(
+                  child: Text(
+                    '🎯',
+                    style: TextStyle(
+                      fontSize: 24,
+                    ),
+                  ),
+                ),
               ),
-            ),
-            Expanded(
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: _buildShareButton(),
+              const SizedBox(width: 12),
+              Text.rich(
+                TextSpan(
+                  children: [
+                    const TextSpan(
+                      text: '동행복권 ',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    TextSpan(
+                      text: 'Plus',
+                      style: TextStyle(
+                        color: const Color(0xFFFFD54F),
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              const SizedBox(width: 12),
+              _buildShareButton(),
+            ],
+          ),
         ),
         const SizedBox(height: 8),
         Text(
           '오늘의 행운을 시험해보세요',
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.5),
+            color: const Color(0xFFFFE082),
             fontSize: 14,
-            fontWeight: FontWeight.w400,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ],
@@ -328,7 +382,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         SharePlus.instance.share(
           ShareParams(
             text:
-                '🎯 동행복권 생성기로 행운의 번호를 뽑아보세요!\n'
+                '🎯 동행복권 Plus로 행운의 번호를 뽑아보세요!\n'
                 '로또 6/45, 연금복권, 파워볼 등 다양한 복권 번호를 AI가 추천해드립니다.',
           ),
         );
