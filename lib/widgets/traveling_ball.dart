@@ -3,16 +3,17 @@ import 'package:flutter/material.dart';
 import '../utils/ball_colors.dart';
 
 class TravelingBall extends StatefulWidget {
-  // 번호 표시 효과
   final int number;
   final Path path;
   final VoidCallback onArrived;
+  final Duration duration;
 
   const TravelingBall({
     super.key,
     required this.number,
     required this.path,
     required this.onArrived,
+    this.duration = const Duration(milliseconds: 1100),
   });
 
   @override
@@ -32,7 +33,7 @@ class _TravelingBallState extends State<TravelingBall>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 650),
+      duration: widget.duration,
     );
 
     _metrics = widget.path.computeMetrics().toList();

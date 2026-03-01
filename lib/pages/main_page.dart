@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'lotto_home_page.dart';
 import 'pension_page.dart';
 import 'powerball_page.dart';
@@ -273,7 +272,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                         ),
                       ),
                     ),
-                    _buildFooter(),
                     const SizedBox(height: 16),
                     Align(
                       alignment: Alignment.centerLeft,
@@ -365,7 +363,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         ),
         const SizedBox(height: 8),
         Text(
-          '오늘의 행운을 시험해보세요',
+          '오늘의 행운 도전!',
           style: TextStyle(
             color: const Color(0xFFFFE082),
             fontSize: 14,
@@ -406,61 +404,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildFooter() {
-    return GestureDetector(
-      onTap: () async {
-        try {
-          await launchUrl(
-            Uri.parse('https://www.dhlottery.co.kr/'),
-            mode: LaunchMode.externalApplication,
-          );
-        } catch (_) {
-          if (mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('브라우저를 열 수 없습니다')));
-          }
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: const LinearGradient(
-            colors: [Color(0xFF38B2AC), Color(0xFF4FD1C5)],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF38B2AC).withValues(alpha: 0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.shopping_cart, color: Colors.white, size: 18),
-            const SizedBox(width: 8),
-            const Text(
-              '동행복권 바로가기',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(width: 4),
-            Icon(
-              Icons.open_in_new,
-              color: Colors.white.withValues(alpha: 0.7),
-              size: 14,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class _LotteryCard extends StatefulWidget {

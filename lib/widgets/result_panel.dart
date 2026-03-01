@@ -52,7 +52,7 @@ class ResultPanel extends StatelessWidget {
   Widget _buildPlaceholder() {
     return Center(
       child: Text(
-        '번호를 추첨하세요',
+        '오늘의 행운 추천번호',
         style: TextStyle(
           color: Colors.white.withValues(alpha: 0.85),
           fontSize: 16,

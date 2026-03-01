@@ -6,11 +6,13 @@ import '../utils/ball_colors.dart';
 class LottoMachine extends StatefulWidget {
   final bool isSpinning;
   final double sphereSize;
+  final List<int>? excludeNumbers;
 
   const LottoMachine({
     super.key,
     this.isSpinning = false,
     this.sphereSize = 220,
+    this.excludeNumbers,
   });
 
   double get totalWidth => sphereSize + 40;
@@ -34,18 +36,21 @@ class LottoMachineState extends State<LottoMachine>
       duration: const Duration(seconds: 1),
     )..addListener(_updateBalls);
     _initBalls();
+    _controller.repeat();
   }
 
   void _initBalls() {
     final s = widget.sphereSize;
     final cx = s / 2;
     final cy = s / 2;
+    final exclude = widget.excludeNumbers?.toSet() ?? <int>{};
+    final ballCount = 45 - exclude.length;
     final usedNumbers = <int>{};
-    _balls = List.generate(28, (_) {
+    _balls = List.generate(ballCount, (_) {
       int n;
       do {
         n = _random.nextInt(45) + 1;
-      } while (usedNumbers.contains(n));
+      } while (usedNumbers.contains(n) || exclude.contains(n));
       usedNumbers.add(n);
       final angle = _random.nextDouble() * pi * 2;
       final r = _random.nextDouble() * s * 0.25;
@@ -53,19 +58,18 @@ class LottoMachineState extends State<LottoMachine>
         x: cx + cos(angle) * r,
         y: cy + sin(angle) * r + s * 0.12,
         number: n,
-        radius: 13,
+        radius: 17,
       );
     });
   }
 
   void _updateBalls() {
-    if (!widget.isSpinning) return;
     setState(() {
       final s = widget.sphereSize;
       final cx = s / 2;
       final cy = s / 2;
       for (final ball in _balls) {
-        ball.update(s / 2 - 8, cx, cy);
+        ball.update(s / 2 - 8, cx, cy, isSpinning: widget.isSpinning);
       }
     });
   }
@@ -79,13 +83,16 @@ class LottoMachineState extends State<LottoMachine>
   @override
   void didUpdateWidget(LottoMachine oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.isSpinning && !_controller.isAnimating) {
+    if (widget.excludeNumbers != oldWidget.excludeNumbers) {
+      _initBalls();
+    }
+    if (widget.isSpinning && !oldWidget.isSpinning) {
       for (final ball in _balls) {
         ball.boost();
       }
+    }
+    if (!_controller.isAnimating) {
       _controller.repeat();
-    } else if (!widget.isSpinning && _controller.isAnimating) {
-      _controller.stop();
     }
   }
 

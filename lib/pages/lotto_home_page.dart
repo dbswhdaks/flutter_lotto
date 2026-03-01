@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/lotto_result.dart';
@@ -31,7 +32,9 @@ class _LottoHomePageState extends State<LottoHomePage> {
   final SoundService _sound = SoundService();
 
   int? _travelingNumber;
+  Duration _travelDuration = const Duration(milliseconds: 1100);
   Completer<void>? _arrivalCompleter;
+  final _random = Random();
 
   @override
   void initState() {
@@ -85,13 +88,16 @@ class _LottoHomePageState extends State<LottoHomePage> {
     for (int i = 0; i < 6; i++) {
       _sound.playBounce();
       _machineKey.currentState?.boostBalls();
-      await Future.delayed(const Duration(milliseconds: 300));
+      final waitBefore = 450 + _random.nextInt(250);
+      await Future.delayed(Duration(milliseconds: waitBefore));
       if (!mounted) return;
 
       _sound.playWhoosh();
       _arrivalCompleter = Completer<void>();
+      final travelMs = 900 + _random.nextInt(500);
       setState(() {
         _travelingNumber = _currentResult!.mainNumbers[i];
+        _travelDuration = Duration(milliseconds: travelMs);
       });
 
       await _arrivalCompleter!.future;
@@ -105,25 +111,28 @@ class _LottoHomePageState extends State<LottoHomePage> {
           ..add(_currentResult!.mainNumbers[i]);
       });
 
-      await Future.delayed(const Duration(milliseconds: 100));
+      final waitAfter = 180 + _random.nextInt(180);
+      await Future.delayed(Duration(milliseconds: waitAfter));
     }
 
-    await Future.delayed(const Duration(milliseconds: 300));
+    await Future.delayed(Duration(milliseconds: 400 + _random.nextInt(200)));
 
     setState(() {
       _showPlus = true;
     });
 
-    await Future.delayed(const Duration(milliseconds: 400));
+    await Future.delayed(Duration(milliseconds: 500 + _random.nextInt(200)));
 
     _sound.playBounce();
     _machineKey.currentState?.boostBalls();
-    await Future.delayed(const Duration(milliseconds: 200));
+    await Future.delayed(Duration(milliseconds: 350 + _random.nextInt(200)));
 
     _sound.playWhoosh();
     _arrivalCompleter = Completer<void>();
+    final bonusTravelMs = 900 + _random.nextInt(500);
     setState(() {
       _travelingNumber = _currentResult!.bonusNumber;
+      _travelDuration = Duration(milliseconds: bonusTravelMs);
     });
 
     await _arrivalCompleter!.future;
@@ -254,6 +263,12 @@ class _LottoHomePageState extends State<LottoHomePage> {
                           key: _machineKey,
                           isSpinning: _isDrawing,
                           sphereSize: _sphereSize,
+                          excludeNumbers: _currentResult != null
+                              ? [
+                                  ..._currentResult!.mainNumbers,
+                                  _currentResult!.bonusNumber,
+                                ]
+                              : null,
                         ),
                         Positioned(
                           right: (MediaQuery.of(context).size.width - _sphereSize) / 2 - 36,
@@ -324,6 +339,7 @@ class _LottoHomePageState extends State<LottoHomePage> {
                   number: _travelingNumber!,
                   path: upwardPath,
                   onArrived: _onBallArrived,
+                  duration: _travelDuration,
                 ),
 
               Positioned.fill(
@@ -517,7 +533,7 @@ class _BuyButton extends StatelessWidget {
       onPressed: () async {
         try {
           await launchUrl(
-            Uri.parse('https://el.dhlottery.co.kr/game/TotalGame.jsp?LottoId=LO40'),
+            Uri.parse('https://www.dhlottery.co.kr/'),
             mode: LaunchMode.externalApplication,
           );
         } catch (_) {
@@ -528,8 +544,8 @@ class _BuyButton extends StatelessWidget {
           }
         }
       },
-      label: '동행복권 바로구매',
-      icon: Icons.shopping_cart,
+      label: '동행복권',
+      icon: Icons.open_in_new_rounded,
       gradientColors: const [Color(0xFF38B2AC), Color(0xFF4FD1C5)],
       shadowColor: const Color(0xFF38B2AC),
     );
