@@ -63,7 +63,7 @@ class _CatchmeAiPageState extends State<CatchmeAiPage>
         backgroundColor: const Color(0xFF16213E),
         foregroundColor: Colors.white,
         centerTitle: true,
-        title: const Text('캐치미 AI 분석',
+        title: const Text('캐치미 번호 분석',
             style: TextStyle(fontWeight: FontWeight.w800)),
         bottom: TabBar(
           controller: _tabController,
@@ -71,7 +71,7 @@ class _CatchmeAiPageState extends State<CatchmeAiPage>
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white54,
           tabs: const [
-            Tab(text: 'AI 추천'),
+            Tab(text: '번호 생성'),
             Tab(text: '통계 분석'),
           ],
         ),
@@ -114,7 +114,7 @@ class _CatchmeAiPageState extends State<CatchmeAiPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionTitle('AI 추천 번호 (5가지 전략)'),
+          _sectionTitle('추천 번호 (5가지 전략)'),
           const SizedBox(height: 4),
           Text(
             '과거 ${a.totalDraws}회 데이터 기반 분석 · 1개 번호 추천',

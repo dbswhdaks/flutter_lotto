@@ -56,7 +56,7 @@ class _PensionAiPageState extends State<PensionAiPage>
         foregroundColor: Colors.white,
         centerTitle: true,
         title: const Text(
-          '연금복권 AI 분석',
+          '연금복권 번호 분석',
           style: TextStyle(fontWeight: FontWeight.w800),
         ),
         bottom: TabBar(
@@ -65,7 +65,7 @@ class _PensionAiPageState extends State<PensionAiPage>
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white54,
           tabs: const [
-            Tab(text: 'AI 추천'),
+            Tab(text: '번호 생성'),
             Tab(text: '통계 분석'),
           ],
         ),
@@ -105,7 +105,7 @@ class _PensionAiPageState extends State<PensionAiPage>
     );
   }
 
-  // ── 탭 1: AI 추천 ──
+  // ── 탭 1: 번호 생성 ──
   Widget _buildRecommendationTab() {
     final a = _analysis!;
     return SingleChildScrollView(
@@ -113,7 +113,7 @@ class _PensionAiPageState extends State<PensionAiPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionTitle('AI 추천 번호 (5세트)'),
+          _sectionTitle('추천 번호 (5세트)'),
           const SizedBox(height: 4),
           Text(
             '과거 ${a.totalDraws}회 데이터 기반 분석',

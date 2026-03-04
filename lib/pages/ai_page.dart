@@ -56,7 +56,7 @@ class _AiPageState extends State<AiPage> with SingleTickerProviderStateMixin {
         foregroundColor: Colors.white,
         centerTitle: true,
         title: const Text(
-          'AI 번호 분석',
+          '번호 분석',
           style: TextStyle(fontWeight: FontWeight.w800),
         ),
         bottom: TabBar(
@@ -65,7 +65,7 @@ class _AiPageState extends State<AiPage> with SingleTickerProviderStateMixin {
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white54,
           tabs: const [
-            Tab(text: 'AI 추천'),
+            Tab(text: '번호 생성'),
             Tab(text: '통계 분석'),
           ],
         ),
@@ -197,7 +197,7 @@ class _AiPageState extends State<AiPage> with SingleTickerProviderStateMixin {
     );
   }
 
-  // ── 탭 2: 로컬 AI 추천 ──
+  // ── 탭 2: 번호 생성 ──
   Widget _buildLocalAiTab() {
     final a = _analysis!;
     final strategies = [
@@ -213,7 +213,7 @@ class _AiPageState extends State<AiPage> with SingleTickerProviderStateMixin {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionTitle('AI 추천 번호 (5세트)'),
+          _sectionTitle('추천 번호 (5세트)'),
           const SizedBox(height: 4),
           Text(
             '과거 ${_dataService.draws.length}회 (최대 1,000회) 데이터 기반 분석',

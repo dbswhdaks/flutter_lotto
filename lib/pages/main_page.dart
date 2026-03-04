@@ -109,7 +109,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                               shadowColor: const Color(0xFF7C3AED),
                               features: const [
                                 '번호 추첨 애니메이션',
-                                'AI 번호 추천',
+                                '번호 생성',
                                 '통계 분석',
                               ],
                               onTap: () => _navigateTo(const LottoHomePage()),
@@ -129,7 +129,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                               features: const [
                                 '슬롯 애니메이션',
                                 '조 + 6자리 추첨',
-                                'AI 분석',
+                                '번호 분석',
                               ],
                               onTap: () => _navigateTo(const PensionPage()),
                               delay: const Duration(milliseconds: 400),
@@ -148,7 +148,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                               features: const [
                                 '1~28 중 5개 추첨',
                                 '파워볼 0~9',
-                                'AI 분석',
+                                '번호 분석',
                               ],
                               onTap: () => _navigateTo(const PowerballPage()),
                               delay: const Duration(milliseconds: 600),
@@ -167,7 +167,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                               features: const [
                                 '1~70 중 10개 추첨',
                                 '5분마다 288회',
-                                'AI 분석',
+                                '번호 분석',
                               ],
                               onTap: () => _navigateTo(const SpeedkinoPage()),
                               delay: const Duration(milliseconds: 800),
@@ -186,7 +186,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                               features: const [
                                 '1~40 중 20개 추첨',
                                 '4×4 빙고판',
-                                'AI 분석',
+                                '번호 분석',
                               ],
                               onTap: () => _navigateTo(const MegabingoPage()),
                               delay: const Duration(milliseconds: 1000),
@@ -205,7 +205,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                               features: const [
                                 '1~27 중 6개 추첨',
                                 '트리플 + 럭',
-                                'AI 분석',
+                                '번호 분석',
                               ],
                               onTap: () => _navigateTo(const TripleluckPage()),
                               delay: const Duration(milliseconds: 1200),
@@ -224,7 +224,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                               features: const [
                                 '1~45 중 6개 × 2세트',
                                 '잭 + 마이더스',
-                                'AI 분석',
+                                '번호 분석',
                               ],
                               onTap: () => _navigateTo(const DoublejackPage()),
                               delay: const Duration(milliseconds: 1400),
@@ -243,7 +243,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                               features: const [
                                 '1~35 중 6개 추첨',
                                 '보물번호 1~10',
-                                'AI 분석',
+                                '번호 분석',
                               ],
                               onTap: () => _navigateTo(const TreasurePage()),
                               delay: const Duration(milliseconds: 1600),
@@ -262,7 +262,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                               features: const [
                                 '1~45 중 1개 선택',
                                 '번호 매칭 게임',
-                                'AI 분석',
+                                '번호 분석',
                               ],
                               onTap: () => _navigateTo(const CatchmePage()),
                               delay: const Duration(milliseconds: 1800),
@@ -332,28 +332,13 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                 ),
               ),
               const SizedBox(width: 12),
-              Text.rich(
-                TextSpan(
-                  children: [
-                    const TextSpan(
-                      text: '동행복권 ',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    TextSpan(
-                      text: 'Plus',
-                      style: TextStyle(
-                        color: const Color(0xFFFFD54F),
-                        fontSize: 28,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                  ],
+              const Text(
+                'Lotto 번호 통계 분석',
+                style: TextStyle(
+                  color: Color(0xFFF5A623),
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.5,
                 ),
               ),
               const SizedBox(width: 12),
@@ -365,7 +350,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         Text(
           '오늘의 행운 도전!',
           style: TextStyle(
-            color: const Color(0xFFFFE082),
+            color: const Color(0xFF4FD1C5),
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
@@ -380,8 +365,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         SharePlus.instance.share(
           ShareParams(
             text:
-                '🎯 동행복권 Plus로 행운의 번호를 뽑아보세요!\n'
-                '로또 6/45, 연금복권, 파워볼 등 다양한 복권 번호를 AI가 추천해드립니다.',
+                '🎯 Lotto 번호 통계 분석으로 행운의 번호를 뽑아보세요!\n'
+                '로또 6/45, 연금복권, 파워볼 등 다양한 복권 번호를 통계 기반으로 추천해드립니다.',
           ),
         );
       },
@@ -390,14 +375,14 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         height: 40,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white.withValues(alpha: 0.1),
+          color: const Color(0xFFF5A623).withValues(alpha: 0.1),
           border: Border.all(
-            color: Colors.white.withValues(alpha: 0.2),
+            color: const Color(0xFFF5A623).withValues(alpha: 0.3),
           ),
         ),
         child: Icon(
           Icons.share_rounded,
-          color: Colors.white.withValues(alpha: 0.8),
+          color: const Color(0xFFF5A623).withValues(alpha: 0.8),
           size: 20,
         ),
       ),

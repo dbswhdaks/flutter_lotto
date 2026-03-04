@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../models/lotto_result.dart';
 import '../services/sound_service.dart';
 import '../widgets/lotto_machine.dart';
@@ -296,28 +295,24 @@ class _LottoHomePageState extends State<LottoHomePage> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            _DrawButton(
-                              onPressed: _isDrawing ? null : _startDraw,
-                              isDrawing: _isDrawing,
+                            Expanded(
+                              child: _DrawButton(
+                                onPressed: _isDrawing ? null : _startDraw,
+                                isDrawing: _isDrawing,
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
-                              child: Column(
-                                children: [
-                                  _AiButton(
-                                    onPressed: _isDrawing
-                                        ? null
-                                        : () {
-                                            Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                  builder: (_) =>
-                                                      const AiPage()),
-                                            );
-                                          },
-                                  ),
-                                  const SizedBox(height: 8),
-                                  const _BuyButton(),
-                                ],
+                              child: _AiButton(
+                                onPressed: _isDrawing
+                                    ? null
+                                    : () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (_) =>
+                                                  const AiPage()),
+                                        );
+                                      },
                               ),
                             ),
                           ],
@@ -394,7 +389,7 @@ class _ActionButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           onTap: onPressed,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
+            padding: const EdgeInsets.symmetric(vertical: 14),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -430,7 +425,6 @@ class _DrawButton extends StatelessWidget {
     final enabled = onPressed != null;
 
     return Container(
-      width: 88,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         gradient: const LinearGradient(
@@ -451,24 +445,28 @@ class _DrawButton extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: onPressed,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                isDrawing ? Icons.hourglass_top : Icons.casino,
-                color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
-                size: 24,
-              ),
-              const SizedBox(height: 2),
-              Text(
-                isDrawing ? '추첨 중' : '추첨 시작',
-                style: TextStyle(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  isDrawing ? Icons.hourglass_top : Icons.casino,
                   color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
+                  size: 24,
                 ),
-              ),
-            ],
+                const SizedBox(height: 2),
+                Text(
+                  isDrawing ? '추첨 중' : '추첨 시작',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -516,7 +514,7 @@ class _AiButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return _ActionButton(
       onPressed: onPressed,
-      label: 'AI 추천',
+      label: '번호 생성하기',
       icon: Icons.auto_awesome,
       gradientColors: const [Color(0xFF4F8CFF), Color(0xFF6FA3FF)],
       shadowColor: const Color(0xFF4F8CFF),
@@ -524,30 +522,3 @@ class _AiButton extends StatelessWidget {
   }
 }
 
-class _BuyButton extends StatelessWidget {
-  const _BuyButton();
-
-  @override
-  Widget build(BuildContext context) {
-    return _ActionButton(
-      onPressed: () async {
-        try {
-          await launchUrl(
-            Uri.parse('https://www.dhlottery.co.kr/'),
-            mode: LaunchMode.externalApplication,
-          );
-        } catch (_) {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('브라우저를 열 수 없습니다')),
-            );
-          }
-        }
-      },
-      label: '동행복권',
-      icon: Icons.open_in_new_rounded,
-      gradientColors: const [Color(0xFF38B2AC), Color(0xFF4FD1C5)],
-      shadowColor: const Color(0xFF38B2AC),
-    );
-  }
-}

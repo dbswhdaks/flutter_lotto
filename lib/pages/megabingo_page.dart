@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../models/megabingo_result.dart';
 import '../services/sound_service.dart';
 import 'megabingo_ai_page.dart';
@@ -550,14 +549,11 @@ class _MegabingoPageState extends State<MegabingoPage>
           Row(
             children: [
               Expanded(
-                flex: 2,
                 child: _DrawButton(
                   onPressed: _isDrawing ? null : _startDraw,
                   isDrawing: _isDrawing,
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(child: _BuyButton()),
             ],
           ),
           const SizedBox(height: 10),
@@ -776,69 +772,13 @@ class _AiButton extends StatelessWidget {
                     size: 18),
                 const SizedBox(width: 8),
                 Text(
-                  'AI 데이터 분석 추천',
+                  '번호 생성하기',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _BuyButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF38B2AC), Color(0xFF4FD1C5)],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF38B2AC).withValues(alpha: 0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () async {
-            try {
-              await launchUrl(
-                Uri.parse('https://el.dhlottery.co.kr/game/TotalGame.jsp?LottoId=LD11'),
-                mode: LaunchMode.externalApplication,
-              );
-            } catch (_) {
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('브라우저를 열 수 없습니다')),
-                );
-              }
-            }
-          },
-          child: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.shopping_cart, color: Colors.white, size: 17),
-                SizedBox(width: 6),
-                Text('구매',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700)),
               ],
             ),
           ),

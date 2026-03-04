@@ -14,12 +14,12 @@ class LottoApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: '동행복권 Plus',
+      title: 'Lotto 번호 통계 분석',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFFE94560),
+          seedColor: const Color(0xFFF5A623),
           brightness: Brightness.dark,
         ),
         fontFamily: 'NotoSansKR',
