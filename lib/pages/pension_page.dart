@@ -743,7 +743,7 @@ class _PensionAiButton extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '번호 생성하기',
+                  'AI 번호 생성기',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
                     fontSize: 14,

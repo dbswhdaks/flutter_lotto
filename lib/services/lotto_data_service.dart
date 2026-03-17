@@ -10,18 +10,30 @@ class LottoDataService {
   static const _cacheKey = 'lotto_draws_cache';
   static const _lastRoundKey = 'lotto_last_round';
 
+  static final DateTime _firstDrawDate = DateTime(2002, 12, 7);
+
   final List<LottoDraw> _draws = [];
   bool _loaded = false;
+  int _latestRound = 0;
 
   List<LottoDraw> get draws => List.unmodifiable(_draws);
   bool get isLoaded => _loaded;
+  int get latestRound => _latestRound;
+
+  /// 날짜 기반으로 가장 최근 추첨 완료된 회차 계산
+  /// 1회: 2002-12-07(토), 매주 토요일 추첨
+  static int calcLatestDrawnRound() {
+    final now = DateTime.now();
+    final diff = now.difference(_firstDrawDate).inDays;
+    if (diff < 0) return 1;
+    return (diff ~/ 7) + 1;
+  }
 
   Future<void> loadData({int fetchCount = 100}) async {
     if (_loaded) return;
 
     final prefs = await SharedPreferences.getInstance();
 
-    // 1) 캐시 로드
     final cached = prefs.getString(_cacheKey);
     if (cached != null) {
       try {
@@ -32,14 +44,82 @@ class LottoDataService {
       } catch (_) {}
     }
 
-    // 2) API에서 최신 데이터 가져오기
     await _fetchLatestDraws(fetchCount, prefs);
 
-    // 3) 데이터가 전혀 없으면 내장 샘플 사용
     if (_draws.isEmpty) {
       _draws.addAll(_fallbackDraws);
     }
 
+    _loaded = true;
+  }
+
+  /// 1회부터 최신회차까지 전체 데이터를 병렬 배치로 로드
+  Future<void> loadAllData({
+    void Function(int loaded, int total)? onProgress,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final cached = prefs.getString(_cacheKey);
+    if (cached != null && _draws.isEmpty) {
+      try {
+        final list = jsonDecode(cached) as List;
+        _draws.addAll(
+          list.map((e) => LottoDraw.fromJson(e as Map<String, dynamic>)),
+        );
+      } catch (_) {}
+    }
+
+    final apiLatest = await _getLatestRound();
+    final latest = apiLatest ?? calcLatestDrawnRound();
+    _latestRound = latest;
+
+    if (apiLatest == null) {
+      if (_draws.isEmpty) _draws.addAll(_fallbackDraws);
+      _draws.sort((a, b) => b.round.compareTo(a.round));
+      _loaded = true;
+      onProgress?.call(latest, latest);
+      return;
+    }
+
+    final existingRounds = _draws.map((d) => d.round).toSet();
+    final missing = <int>[];
+    for (int r = 1; r <= latest; r++) {
+      if (!existingRounds.contains(r)) missing.add(r);
+    }
+
+    if (missing.isEmpty) {
+      _draws.sort((a, b) => b.round.compareTo(a.round));
+      _loaded = true;
+      onProgress?.call(latest, latest);
+      return;
+    }
+
+    int loaded = latest - missing.length;
+    onProgress?.call(loaded, latest);
+
+    const batchSize = 20;
+    for (int i = 0; i < missing.length; i += batchSize) {
+      final batch = missing.skip(i).take(batchSize).toList();
+      final futures = batch.map((r) => _fetchDraw(r));
+      final results = await Future.wait(futures);
+
+      for (final draw in results) {
+        if (draw != null && !existingRounds.contains(draw.round)) {
+          _draws.add(draw);
+          existingRounds.add(draw.round);
+        }
+      }
+
+      loaded += batch.length;
+      onProgress?.call(loaded, latest);
+
+      if (i + batchSize < missing.length) {
+        await Future.delayed(const Duration(milliseconds: 50));
+      }
+    }
+
+    _draws.sort((a, b) => b.round.compareTo(a.round));
+    await _saveCache(prefs, latest);
     _loaded = true;
   }
 
@@ -50,17 +130,18 @@ class LottoDataService {
 
   Future<void> _fetchLatestDraws(int count, SharedPreferences prefs) async {
     try {
-      final latestRound = await _getLatestRound();
-      if (latestRound == null) return;
+      final latest = await _getLatestRound();
+      if (latest == null) return;
+      _latestRound = latest;
 
       final cachedLast = prefs.getInt(_lastRoundKey) ?? 0;
-      if (cachedLast >= latestRound && _draws.isNotEmpty) return;
+      if (cachedLast >= latest && _draws.isNotEmpty) return;
 
-      final startRound = (latestRound - count + 1).clamp(1, latestRound);
+      final startRound = (latest - count + 1).clamp(1, latest);
       final existingRounds = _draws.map((d) => d.round).toSet();
       final newDraws = <LottoDraw>[];
 
-      for (int r = startRound; r <= latestRound; r++) {
+      for (int r = startRound; r <= latest; r++) {
         if (existingRounds.contains(r)) continue;
 
         final draw = await _fetchDraw(r);
@@ -74,11 +155,9 @@ class LottoDataService {
       if (newDraws.isNotEmpty) {
         _draws.addAll(newDraws);
         _draws.sort((a, b) => b.round.compareTo(a.round));
-        await _saveCache(prefs, latestRound);
+        await _saveCache(prefs, latest);
       }
-    } catch (_) {
-      // 네트워크 실패 시 캐시/fallback 데이터 사용
-    }
+    } catch (_) {}
   }
 
   Future<void> _saveCache(SharedPreferences prefs, int latestRound) async {
@@ -100,11 +179,10 @@ class LottoDataService {
   }
 
   Future<int?> _getLatestRound() async {
-    final now = DateTime.now();
-    final base = DateTime(2002, 12, 7);
-    final estimated = (now.difference(base).inDays / 7).floor();
+    final estimated = calcLatestDrawnRound();
 
-    for (int r = estimated + 2; r >= estimated - 5; r--) {
+    for (int r = estimated + 2; r >= estimated - 10; r--) {
+      if (r < 1) continue;
       final draw = await _fetchDraw(r);
       if (draw != null) return r;
     }
@@ -114,7 +192,7 @@ class LottoDataService {
   Future<LottoDraw?> _fetchDraw(int round) async {
     try {
       final uri = Uri.parse(_buildUrl(round));
-      final response = await http.get(uri).timeout(const Duration(seconds: 8));
+      final response = await http.get(uri).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body) as Map<String, dynamic>;
@@ -126,7 +204,6 @@ class LottoDataService {
     return null;
   }
 
-  // 네트워크 실패 시 사용할 최근 당첨번호 샘플 (2024~2025)
   static final _fallbackDraws = [
     const LottoDraw(round: 1211, numbers: [23, 26, 27, 35, 38, 40], bonus: 10),
     const LottoDraw(round: 1210, numbers: [2, 8, 19, 32, 37, 40], bonus: 15),

@@ -514,7 +514,7 @@ class _AiButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return _ActionButton(
       onPressed: onPressed,
-      label: '번호 생성하기',
+      label: 'AI 번호 생성기',
       icon: Icons.auto_awesome,
       gradientColors: const [Color(0xFF4F8CFF), Color(0xFF6FA3FF)],
       shadowColor: const Color(0xFF4F8CFF),

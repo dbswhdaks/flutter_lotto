@@ -444,30 +444,47 @@ class _MegabingoPageState extends State<MegabingoPage>
             runSpacing: 4,
             children: List.generate(20, (i) {
               final revealed = i < _revealIndex;
-              final num = revealed ? _currentResult!.drawnNumbers[i] : null;
-              final c = num != null ? _numColor(num) : Colors.white.withValues(alpha: 0.08);
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
+              final num = _currentResult!.drawnNumbers[i];
+              final c = _numColor(num);
+              return SizedBox(
                 width: 28,
                 height: 28,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: revealed
-                      ? LinearGradient(
-                          colors: [c, Color.lerp(c, Colors.black, 0.15)!],
-                        )
-                      : null,
-                  color: revealed ? null : c,
-                ),
-                child: Center(
-                  child: Text(
-                    revealed ? '$num' : '',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
+                child: Stack(
+                  children: [
+                    Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withValues(alpha: 0.08),
+                      ),
                     ),
-                  ),
+                    AnimatedScale(
+                      duration: const Duration(milliseconds: 250),
+                      scale: revealed ? 1.0 : 0.0,
+                      curve: Curves.easeOutBack,
+                      child: Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [c, Color.lerp(c, Colors.black, 0.15)!],
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            '$num',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               );
             }),
@@ -772,7 +789,7 @@ class _AiButton extends StatelessWidget {
                     size: 18),
                 const SizedBox(width: 8),
                 Text(
-                  '번호 생성하기',
+                  'AI 번호 생성기',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
                     fontSize: 14,
