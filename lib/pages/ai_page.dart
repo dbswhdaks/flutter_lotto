@@ -19,7 +19,7 @@ class _AiPageState extends State<AiPage> with SingleTickerProviderStateMixin {
   int _loadedCount = 0;
   int _totalCount = 0;
   FullAnalysisResult? _fullAnalysis;
-  int _recommendRoundCount = 5;
+  int _recommendRoundCount = 1;
 
   @override
   void initState() {
@@ -69,11 +69,6 @@ class _AiPageState extends State<AiPage> with SingleTickerProviderStateMixin {
             : null,
       );
     });
-  }
-
-  void _addMoreRounds() {
-    setState(() => _recommendRoundCount += 5);
-    _refreshRecommendations();
   }
 
   @override
@@ -237,32 +232,17 @@ class _AiPageState extends State<AiPage> with SingleTickerProviderStateMixin {
         children: [
           _infoCard(
             '1회 ~ ${a.latestRound}회 (총 ${a.totalDraws}회) 전체 데이터 기반 분석\n'
-            '제 ${a.latestRound + 1}회부터 추천번호를 제공합니다',
+            '제 ${a.latestRound + 1}회 추천번호를 제공합니다',
             const Color(0xFFF5A623),
           ),
           const SizedBox(height: 16),
           ...a.roundRecommendations.map(_buildRoundSection),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _gradientButton(
-                  label: '다시 추천받기',
-                  icon: Icons.refresh,
-                  colors: const [Color(0xFFE94560), Color(0xFFFF6B81)],
-                  onPressed: _refreshRecommendations,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _gradientButton(
-                  label: '더 많은 회차',
-                  icon: Icons.add,
-                  colors: const [Color(0xFF4F8CFF), Color(0xFF6FA3FF)],
-                  onPressed: _addMoreRounds,
-                ),
-              ),
-            ],
+          _gradientButton(
+            label: '다시 추천받기',
+            icon: Icons.refresh,
+            colors: const [Color(0xFFE94560), Color(0xFFFF6B81)],
+            onPressed: _refreshRecommendations,
           ),
           const SizedBox(height: 60),
         ],
@@ -414,7 +394,7 @@ class _AiPageState extends State<AiPage> with SingleTickerProviderStateMixin {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _infoCard(
-            '1회 ~ ${a.latestRound}회 | 총 ${a.totalDraws}회 분석 완료',
+            '1회 ~ ${a.latestRound}회 | 전체 분석 완료',
             const Color(0xFF4FD1C5),
           ),
           const SizedBox(height: 20),
@@ -524,8 +504,6 @@ class _AiPageState extends State<AiPage> with SingleTickerProviderStateMixin {
       ),
       child: Row(
         children: [
-          Icon(Icons.info_outline, color: color, size: 18),
-          const SizedBox(width: 10),
           Expanded(
             child: Text(
               text,

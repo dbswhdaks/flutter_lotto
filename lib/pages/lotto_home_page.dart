@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../models/lotto_result.dart';
 import '../services/sound_service.dart';
+import '../widgets/lotto_ball.dart';
 import '../widgets/lotto_machine.dart';
 import '../widgets/result_panel.dart';
 import '../widgets/history_panel.dart';
@@ -290,35 +291,34 @@ class _LottoHomePageState extends State<LottoHomePage> {
                     ),
                     const SizedBox(height: 4),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: IntrinsicHeight(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(
-                              child: _DrawButton(
-                                onPressed: _isDrawing ? null : _startDraw,
-                                isDrawing: _isDrawing,
-                              ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _DrawButton(
+                              onPressed: _isDrawing ? null : _startDraw,
+                              isDrawing: _isDrawing,
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _AiButton(
-                                onPressed: _isDrawing
-                                    ? null
-                                    : () {
-                                        Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                              builder: (_) =>
-                                                  const AiPage()),
-                                        );
-                                      },
-                              ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _AiButton(
+                              onPressed: _isDrawing
+                                  ? null
+                                  : () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                            builder: (_) =>
+                                                const AiPage()),
+                                      );
+                                    },
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
+                    const SizedBox(height: 20),
+                    const _TodayLuckyNumbers(),
                     const SizedBox(height: 20),
                     HistoryPanel(history: _history),
                     const SizedBox(height: 30),
@@ -350,123 +350,129 @@ class _LottoHomePageState extends State<LottoHomePage> {
   }
 }
 
-class _ActionButton extends StatelessWidget {
-  final VoidCallback? onPressed;
-  final String label;
-  final IconData? icon;
-  final List<Color> gradientColors;
-  final Color? shadowColor;
-
-  const _ActionButton({
-    required this.onPressed,
-    required this.label,
-    this.icon,
-    this.gradientColors = const [],
-    this.shadowColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final enabled = onPressed != null;
-
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: LinearGradient(colors: gradientColors),
-        boxShadow: shadowColor != null
-            ? [
-                BoxShadow(
-                  color: shadowColor!.withValues(alpha: 0.3),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
-                ),
-              ]
-            : null,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onPressed,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (icon != null) ...[
-                  Icon(icon, color: Colors.white.withValues(alpha: enabled ? 1 : 0.5), size: 17),
-                  const SizedBox(width: 6),
-                ],
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DrawButton extends StatelessWidget {
+class _DrawButton extends StatefulWidget {
   final VoidCallback? onPressed;
   final bool isDrawing;
 
   const _DrawButton({required this.onPressed, required this.isDrawing});
 
   @override
-  Widget build(BuildContext context) {
-    final enabled = onPressed != null;
+  State<_DrawButton> createState() => _DrawButtonState();
+}
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF7C3AED), Color(0xFF9F7AEA)],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF7C3AED).withValues(alpha: 0.35),
-            blurRadius: 12,
-            offset: const Offset(0, 3),
+class _DrawButtonState extends State<_DrawButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+    _pulseAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = widget.onPressed != null;
+
+    return AnimatedBuilder(
+      animation: _pulseAnim,
+      builder: (context, child) {
+        final glowOpacity = widget.isDrawing ? 0.1 : 0.2 + _pulseAnim.value * 0.25;
+        return Container(
+          height: 72,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: widget.isDrawing
+                  ? [const Color(0xFF5B21B6), const Color(0xFF7C3AED)]
+                  : [const Color(0xFF7C3AED), const Color(0xFFA855F7)],
+            ),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.15),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF7C3AED).withValues(alpha: glowOpacity),
+                blurRadius: 20,
+                spreadRadius: 2,
+                offset: const Offset(0, 4),
+              ),
+              BoxShadow(
+                color: const Color(0xFFA855F7).withValues(alpha: glowOpacity * 0.5),
+                blurRadius: 40,
+                spreadRadius: -4,
+              ),
+            ],
           ),
-        ],
-      ),
+          child: child,
+        );
+      },
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onPressed,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  isDrawing ? Icons.hourglass_top : Icons.casino,
-                  color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
-                  size: 24,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  isDrawing ? '추첨 중' : '추첨 시작',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
+          borderRadius: BorderRadius.circular(20),
+          onTap: widget.onPressed,
+          child: Stack(
+            children: [
+              Positioned(
+                top: -10,
+                right: -10,
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.05),
                   ),
                 ),
-              ],
-            ),
+              ),
+              Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withValues(alpha: 0.15),
+                      ),
+                      child: Icon(
+                        widget.isDrawing ? Icons.hourglass_top : Icons.casino_rounded,
+                        color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
+                        size: 19,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      widget.isDrawing ? '추첨 중...' : '추첨 시작',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -505,19 +511,358 @@ class _ResetButton extends StatelessWidget {
   }
 }
 
-class _AiButton extends StatelessWidget {
+class _AiButton extends StatefulWidget {
   final VoidCallback? onPressed;
 
   const _AiButton({required this.onPressed});
 
   @override
+  State<_AiButton> createState() => _AiButtonState();
+}
+
+class _AiButtonState extends State<_AiButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _shimmerController;
+  late Animation<double> _shimmerAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    )..repeat();
+    _shimmerAnim = Tween<double>(begin: -1.0, end: 2.0).animate(
+      CurvedAnimation(parent: _shimmerController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _shimmerController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return _ActionButton(
-      onPressed: onPressed,
-      label: 'AI 번호 생성기',
-      icon: Icons.auto_awesome,
-      gradientColors: const [Color(0xFF4F8CFF), Color(0xFF6FA3FF)],
-      shadowColor: const Color(0xFF4F8CFF),
+    final enabled = widget.onPressed != null;
+
+    return AnimatedBuilder(
+      animation: _shimmerAnim,
+      builder: (context, child) {
+        return Container(
+          height: 72,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF0EA5E9), Color(0xFF3B82F6), Color(0xFF6366F1)],
+            ),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.15),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF3B82F6).withValues(alpha: 0.3),
+                blurRadius: 16,
+                spreadRadius: 1,
+                offset: const Offset(0, 4),
+              ),
+              BoxShadow(
+                color: const Color(0xFF6366F1).withValues(alpha: 0.15),
+                blurRadius: 30,
+                spreadRadius: -4,
+              ),
+            ],
+          ),
+          child: child,
+        );
+      },
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: widget.onPressed,
+          child: Stack(
+            children: [
+              Positioned(
+                bottom: -8,
+                left: -8,
+                child: Container(
+                  width: 45,
+                  height: 45,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.05),
+                  ),
+                ),
+              ),
+              Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.white.withValues(alpha: 0.2),
+                            Colors.white.withValues(alpha: 0.08),
+                          ],
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.auto_awesome,
+                        color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
+                        size: 19,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'AI 번호 생성기',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TodayLuckyNumbers extends StatefulWidget {
+  const _TodayLuckyNumbers();
+
+  @override
+  State<_TodayLuckyNumbers> createState() => _TodayLuckyNumbersState();
+}
+
+class _TodayLuckyNumbersState extends State<_TodayLuckyNumbers>
+    with SingleTickerProviderStateMixin {
+  late List<int> _luckyNumbers;
+  late AnimationController _controller;
+  late Animation<double> _fadeAnim;
+  final _random = Random();
+
+  @override
+  void initState() {
+    super.initState();
+    _luckyNumbers = _generateLucky();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..forward();
+    _fadeAnim = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
+  }
+
+  List<int> _generateLucky() {
+    final now = DateTime.now();
+    final seed = now.year * 10000 + now.month * 100 + now.day;
+    final rng = Random(seed + _random.nextInt(1000));
+    final numbers = <int>{};
+    while (numbers.length < 6) {
+      numbers.add(rng.nextInt(45) + 1);
+    }
+    return numbers.toList()..sort();
+  }
+
+  void _refresh() {
+    setState(() {
+      _luckyNumbers = _generateLucky();
+    });
+    _controller.reset();
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  String _getTodayDateString() {
+    final now = DateTime.now();
+    const weekDays = ['월', '화', '수', '목', '금', '토', '일'];
+    final wd = weekDays[now.weekday - 1];
+    return '${now.year}.${now.month.toString().padLeft(2, '0')}.${now.day.toString().padLeft(2, '0')} ($wd)';
+  }
+
+  String _getLuckyMessage() {
+    final messages = [
+      '오늘 행운이 함께합니다!',
+      '좋은 기운이 넘치는 날이에요!',
+      '오늘의 특별한 번호를 확인하세요!',
+      '행운의 번호가 당신을 기다려요!',
+      '대박의 기운을 느껴보세요!',
+    ];
+    final now = DateTime.now();
+    return messages[(now.day + now.month) % messages.length];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color(0xFFF59E0B).withValues(alpha: 0.12),
+              const Color(0xFFF97316).withValues(alpha: 0.08),
+              const Color(0xFFEF4444).withValues(alpha: 0.06),
+            ],
+          ),
+          border: Border.all(
+            color: const Color(0xFFF59E0B).withValues(alpha: 0.25),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFF59E0B).withValues(alpha: 0.1),
+              blurRadius: 20,
+              spreadRadius: -4,
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 14, 12, 10),
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(19)),
+                gradient: LinearGradient(
+                  colors: [
+                    const Color(0xFFF59E0B).withValues(alpha: 0.15),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFFFBBF24), Color(0xFFF59E0B)],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFF59E0B).withValues(alpha: 0.4),
+                          blurRadius: 8,
+                          spreadRadius: -2,
+                        ),
+                      ],
+                    ),
+                    child: const Icon(Icons.stars_rounded, color: Colors.white, size: 18),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '오늘의 행운 추천번호',
+                          style: TextStyle(
+                            color: Color(0xFFFBBF24),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          _getTodayDateString(),
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.45),
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: _refresh,
+                    child: Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withValues(alpha: 0.08),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.12),
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.refresh_rounded,
+                        color: Color(0xFFFBBF24),
+                        size: 18,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            FadeTransition(
+              opacity: _fadeAnim,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    for (int i = 0; i < _luckyNumbers.length; i++) ...[
+                      if (i > 0) const SizedBox(width: 6),
+                      LottoBall(number: _luckyNumbers[i], size: 42),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.auto_awesome,
+                    color: const Color(0xFFFBBF24).withValues(alpha: 0.5),
+                    size: 13,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    _getLuckyMessage(),
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.5),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
