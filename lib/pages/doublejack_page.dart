@@ -154,11 +154,7 @@ class _DoublejackPageState extends State<DoublejackPage>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF1A1A2E),
-              Color(0xFF16213E),
-              Color(0xFF0F3460),
-            ],
+            colors: [Color(0xFF1A1A2E), Color(0xFF16213E), Color(0xFF0F3460)],
           ),
         ),
         child: SafeArea(
@@ -168,8 +164,9 @@ class _DoublejackPageState extends State<DoublejackPage>
                 builder: (context, constraints) {
                   return SingleChildScrollView(
                     child: ConstrainedBox(
-                      constraints:
-                          BoxConstraints(minHeight: constraints.maxHeight),
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
+                      ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -209,11 +206,13 @@ class _DoublejackPageState extends State<DoublejackPage>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white.withValues(alpha: 0.1),
-                border:
-                    Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
               ),
-              child:
-                  const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ),
           const Expanded(
@@ -249,10 +248,15 @@ class _DoublejackPageState extends State<DoublejackPage>
                 shape: BoxShape.circle,
                 color: Colors.black.withValues(alpha: 0.3),
                 border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.2), width: 1.5),
+                  color: Colors.white.withValues(alpha: 0.2),
+                  width: 1.5,
+                ),
               ),
-              child: Icon(Icons.refresh,
-                  color: Colors.white.withValues(alpha: 0.9), size: 22),
+              child: Icon(
+                Icons.refresh,
+                color: Colors.white.withValues(alpha: 0.9),
+                size: 22,
+              ),
             ),
           ),
         ],
@@ -273,11 +277,7 @@ class _DoublejackPageState extends State<DoublejackPage>
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF2A1F00),
-                Color(0xFF1E1600),
-                Color(0xFF161000),
-              ],
+              colors: [Color(0xFF2A1F00), Color(0xFF1E1600), Color(0xFF161000)],
             ),
             border: Border.all(
               color: Color.lerp(
@@ -289,8 +289,9 @@ class _DoublejackPageState extends State<DoublejackPage>
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFFFB300)
-                    .withValues(alpha: 0.1 + glow * 0.15),
+                color: const Color(
+                  0xFFFFB300,
+                ).withValues(alpha: 0.1 + glow * 0.15),
                 blurRadius: 20 + glow * 15,
                 spreadRadius: -2,
               ),
@@ -347,7 +348,9 @@ class _DoublejackPageState extends State<DoublejackPage>
   }
 
   Widget _buildBallRow(
-      List<int> revealed, List<AnimationController> controllers) {
+    List<int> revealed,
+    List<AnimationController> controllers,
+  ) {
     return Row(
       children: List.generate(6, (i) {
         final hasNumber = i < revealed.length;
@@ -360,8 +363,7 @@ class _DoublejackPageState extends State<DoublejackPage>
                 animation: controllers[i],
                 builder: (context, _) {
                   final bounce = hasNumber
-                      ? 1.0 +
-                          (1 - controllers[i].value).clamp(0.0, 1.0) * 0.2
+                      ? 1.0 + (1 - controllers[i].value).clamp(0.0, 1.0) * 0.2
                       : 1.0;
                   final color = hasNumber
                       ? _ballColor(revealed[i])
@@ -453,7 +455,8 @@ class _DoublejackPageState extends State<DoublejackPage>
                 : () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                          builder: (_) => const DoublejackAiPage()),
+                        builder: (_) => const DoublejackAiPage(),
+                      ),
                     );
                   },
           ),
@@ -476,8 +479,11 @@ class _DoublejackPageState extends State<DoublejackPage>
             padding: const EdgeInsets.only(left: 4, bottom: 8),
             child: Row(
               children: [
-                Icon(Icons.history,
-                    color: Colors.white.withValues(alpha: 0.5), size: 16),
+                Icon(
+                  Icons.history,
+                  color: Colors.white.withValues(alpha: 0.5),
+                  size: 16,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   '추첨 이력',
@@ -505,9 +511,7 @@ class _DoublejackPageState extends State<DoublejackPage>
 
   Widget _buildConfettiOverlay() {
     return Positioned.fill(
-      child: IgnorePointer(
-        child: _DJConfetti(key: ValueKey(_drawCount)),
-      ),
+      child: IgnorePointer(child: _DJConfetti(key: ValueKey(_drawCount))),
     );
   }
 }
@@ -602,12 +606,14 @@ class _AiButton extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.auto_awesome,
-                    color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
-                    size: 18),
+                Icon(
+                  Icons.auto_awesome,
+                  color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
+                  size: 18,
+                ),
                 const SizedBox(width: 8),
                 Text(
-                  'AI 번호 생성기',
+                  'AI 확률 강화',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
                     fontSize: 14,
@@ -654,17 +660,21 @@ class _HistoryRow extends StatelessWidget {
             ),
             _badge('J', const Color(0xFFFFD700)),
             const SizedBox(width: 3),
-            ...result.jackNumbers.map((n) => Padding(
-                  padding: const EdgeInsets.only(right: 3),
-                  child: _mini(n),
-                )),
+            ...result.jackNumbers.map(
+              (n) => Padding(
+                padding: const EdgeInsets.only(right: 3),
+                child: _mini(n),
+              ),
+            ),
             const SizedBox(width: 4),
             _badge('M', const Color(0xFFFF6F00)),
             const SizedBox(width: 3),
-            ...result.midasNumbers.map((n) => Padding(
-                  padding: const EdgeInsets.only(right: 3),
-                  child: _mini(n),
-                )),
+            ...result.midasNumbers.map(
+              (n) => Padding(
+                padding: const EdgeInsets.only(right: 3),
+                child: _mini(n),
+              ),
+            ),
           ],
         ),
       ),
@@ -678,9 +688,14 @@ class _HistoryRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
         color: color.withValues(alpha: 0.15),
       ),
-      child: Text(label,
-          style:
-              TextStyle(color: color, fontSize: 9, fontWeight: FontWeight.w800)),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 9,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
     );
   }
 
@@ -699,7 +714,10 @@ class _HistoryRow extends StatelessWidget {
         child: Text(
           '$n',
           style: const TextStyle(
-              color: Colors.white, fontSize: 9, fontWeight: FontWeight.w700),
+            color: Colors.white,
+            fontSize: 9,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );
@@ -744,7 +762,9 @@ class _DJConfettiState extends State<_DJConfetti>
       builder: (context, _) {
         return CustomPaint(
           painter: _ConfettiPainter(
-              particles: _particles, progress: _controller.value),
+            particles: _particles,
+            progress: _controller.value,
+          ),
           size: Size.infinite,
         );
       },
@@ -757,19 +777,19 @@ class _Particle {
   final Color color;
 
   _Particle(Random r)
-      : x = r.nextDouble(),
-        speed = 0.3 + r.nextDouble() * 0.7,
-        size = 4 + r.nextDouble() * 6,
-        drift = (r.nextDouble() - 0.5) * 0.3,
-        rotation = r.nextDouble() * pi * 2,
-        color = [
-          const Color(0xFFFFD700),
-          const Color(0xFFFFB300),
-          const Color(0xFFFF8F00),
-          const Color(0xFFEF6C00),
-          const Color(0xFFFFC107),
-          const Color(0xFFFFECB3),
-        ][r.nextInt(6)];
+    : x = r.nextDouble(),
+      speed = 0.3 + r.nextDouble() * 0.7,
+      size = 4 + r.nextDouble() * 6,
+      drift = (r.nextDouble() - 0.5) * 0.3,
+      rotation = r.nextDouble() * pi * 2,
+      color = [
+        const Color(0xFFFFD700),
+        const Color(0xFFFFB300),
+        const Color(0xFFFF8F00),
+        const Color(0xFFEF6C00),
+        const Color(0xFFFFC107),
+        const Color(0xFFFFECB3),
+      ][r.nextInt(6)];
 }
 
 class _ConfettiPainter extends CustomPainter {
@@ -782,8 +802,8 @@ class _ConfettiPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     for (final p in particles) {
       final y = -20 + progress * size.height * p.speed * 1.5;
-      final x = p.x * size.width +
-          sin(progress * pi * 3 + p.rotation) * 30 * p.drift;
+      final x =
+          p.x * size.width + sin(progress * pi * 3 + p.rotation) * 30 * p.drift;
       final opacity = (1 - progress).clamp(0.0, 1.0);
       final paint = Paint()..color = p.color.withValues(alpha: opacity * 0.8);
       canvas.save();
@@ -791,7 +811,10 @@ class _ConfettiPainter extends CustomPainter {
       canvas.rotate(progress * pi * 2 * p.speed + p.rotation);
       canvas.drawRect(
         Rect.fromCenter(
-            center: Offset.zero, width: p.size, height: p.size * 0.6),
+          center: Offset.zero,
+          width: p.size,
+          height: p.size * 0.6,
+        ),
         paint,
       );
       canvas.restore();

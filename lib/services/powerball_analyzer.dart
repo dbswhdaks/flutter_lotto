@@ -1,5 +1,6 @@
 import 'dart:math';
 import '../models/powerball_draw.dart';
+import '../utils/recommendation_scoring.dart';
 
 class PowerballAnalysisResult {
   final Map<int, int> numberFrequency;
@@ -52,7 +53,18 @@ class PowerballAnalyzer {
     final overdue = _getOverdueNumbers();
     final hotPb = _getHotPowerballs(recentCount: 30);
     final rangeDist = _getRangeDistribution();
-    final recs = _generateRecommendations(numFreq, pbFreq, hot, cold, overdue, hotPb);
+    final avgSum = _getAvgSum();
+    final avgOddRatio = _getAvgOddRatio();
+    final recs = _generateRecommendations(
+      numFreq,
+      pbFreq,
+      hot,
+      cold,
+      overdue,
+      hotPb,
+      avgSum,
+      avgOddRatio,
+    );
 
     return PowerballAnalysisResult(
       numberFrequency: numFreq,
@@ -158,6 +170,24 @@ class PowerballAnalyzer {
     return ranges.map((k, v) => MapEntry(k, total > 0 ? v / total * 100 : 0));
   }
 
+  double _getAvgSum() {
+    if (draws.isEmpty) return 0;
+    double total = 0;
+    for (final draw in draws) {
+      total += draw.numbers.reduce((a, b) => a + b);
+    }
+    return total / draws.length;
+  }
+
+  double _getAvgOddRatio() {
+    if (draws.isEmpty) return 0.5;
+    double total = 0;
+    for (final draw in draws) {
+      total += draw.numbers.where((n) => n.isOdd).length / 5;
+    }
+    return total / draws.length;
+  }
+
   List<PowerballRecommendation> _generateRecommendations(
     Map<int, int> numFreq,
     Map<int, int> pbFreq,
@@ -165,19 +195,67 @@ class PowerballAnalyzer {
     List<int> cold,
     List<int> overdue,
     List<int> hotPb,
+    double avgSum,
+    double avgOddRatio,
   ) {
     final rng = Random();
+    PowerballRecommendation improve(PowerballRecommendation Function() picker) {
+      return RecommendationScoring.bestCandidate(
+        rng: rng,
+        picker: picker,
+        score: (rec) => _scoreRecommendation(
+          rec,
+          numFreq,
+          pbFreq,
+          hot.toSet(),
+          overdue.toSet(),
+          avgSum,
+          avgOddRatio,
+        ),
+      );
+    }
+
     return [
-      _hotStrategy(hot, hotPb, rng),
-      _coldStrategy(cold, numFreq, pbFreq, rng),
-      _mixedStrategy(hot, overdue, hotPb, numFreq, rng),
-      _rangeBalancedStrategy(numFreq, pbFreq, rng),
-      _weightedRandomStrategy(numFreq, pbFreq, rng),
+      improve(() => _hotStrategy(hot, hotPb, rng)),
+      improve(() => _coldStrategy(cold, numFreq, pbFreq, rng)),
+      improve(() => _mixedStrategy(hot, overdue, hotPb, numFreq, rng)),
+      improve(() => _rangeBalancedStrategy(numFreq, pbFreq, rng)),
+      improve(() => _weightedRandomStrategy(numFreq, pbFreq, rng)),
     ];
   }
 
+  double _scoreRecommendation(
+    PowerballRecommendation rec,
+    Map<int, int> numFreq,
+    Map<int, int> pbFreq,
+    Set<int> hot,
+    Set<int> overdue,
+    double avgSum,
+    double avgOddRatio,
+  ) {
+    final maxPbFreq = pbFreq.values.isEmpty ? 1 : pbFreq.values.reduce(max);
+    final powerballScore =
+        (pbFreq[rec.powerball] ?? 0) / (maxPbFreq == 0 ? 1 : maxPbFreq);
+
+    return RecommendationScoring.scoreNumbers(
+          rec.numbers,
+          frequency: numFreq,
+          minNumber: 1,
+          maxNumber: 28,
+          targetCount: 5,
+          targetSum: avgSum,
+          targetOddRatio: avgOddRatio,
+          preferredNumbers: hot,
+          secondaryPreferredNumbers: overdue,
+        ) +
+        powerballScore * 8;
+  }
+
   PowerballRecommendation _hotStrategy(
-      List<int> hot, List<int> hotPb, Random rng) {
+    List<int> hot,
+    List<int> hotPb,
+    Random rng,
+  ) {
     final pool = List<int>.from(hot);
     while (pool.length < 10) {
       final n = rng.nextInt(28) + 1;
@@ -194,7 +272,11 @@ class PowerballAnalyzer {
   }
 
   PowerballRecommendation _coldStrategy(
-      List<int> cold, Map<int, int> numFreq, Map<int, int> pbFreq, Random rng) {
+    List<int> cold,
+    Map<int, int> numFreq,
+    Map<int, int> pbFreq,
+    Random rng,
+  ) {
     final picked = <int>{};
     final coldList = List<int>.from(cold)..shuffle(rng);
     for (final n in coldList.take(2)) {
@@ -217,8 +299,12 @@ class PowerballAnalyzer {
   }
 
   PowerballRecommendation _mixedStrategy(
-      List<int> hot, List<int> overdue, List<int> hotPb,
-      Map<int, int> numFreq, Random rng) {
+    List<int> hot,
+    List<int> overdue,
+    List<int> hotPb,
+    Map<int, int> numFreq,
+    Random rng,
+  ) {
     final picked = <int>{};
     final hotShuffled = List<int>.from(hot)..shuffle(rng);
     final overdueShuffled = List<int>.from(overdue)..shuffle(rng);
@@ -242,7 +328,10 @@ class PowerballAnalyzer {
   }
 
   PowerballRecommendation _rangeBalancedStrategy(
-      Map<int, int> numFreq, Map<int, int> pbFreq, Random rng) {
+    Map<int, int> numFreq,
+    Map<int, int> pbFreq,
+    Random rng,
+  ) {
     final ranges = [
       List.generate(7, (i) => i + 1),
       List.generate(7, (i) => i + 8),
@@ -267,7 +356,10 @@ class PowerballAnalyzer {
   }
 
   PowerballRecommendation _weightedRandomStrategy(
-      Map<int, int> numFreq, Map<int, int> pbFreq, Random rng) {
+    Map<int, int> numFreq,
+    Map<int, int> pbFreq,
+    Random rng,
+  ) {
     final maxF = numFreq.values.reduce(max).toDouble();
     final picked = <int>{};
     int attempts = 0;

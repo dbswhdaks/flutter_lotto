@@ -139,11 +139,7 @@ class _PowerballPageState extends State<PowerballPage>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF1A1A2E),
-              Color(0xFF16213E),
-              Color(0xFF0F3460),
-            ],
+            colors: [Color(0xFF1A1A2E), Color(0xFF16213E), Color(0xFF0F3460)],
           ),
         ),
         child: SafeArea(
@@ -153,8 +149,9 @@ class _PowerballPageState extends State<PowerballPage>
                 builder: (context, constraints) {
                   return SingleChildScrollView(
                     child: ConstrainedBox(
-                      constraints:
-                          BoxConstraints(minHeight: constraints.maxHeight),
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
+                      ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -196,11 +193,13 @@ class _PowerballPageState extends State<PowerballPage>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white.withValues(alpha: 0.1),
-                border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.2)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
               ),
-              child: const Icon(Icons.arrow_back,
-                  color: Colors.white, size: 20),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ),
           const Expanded(
@@ -240,8 +239,11 @@ class _PowerballPageState extends State<PowerballPage>
                   width: 1.5,
                 ),
               ),
-              child: Icon(Icons.refresh,
-                  color: Colors.white.withValues(alpha: 0.9), size: 22),
+              child: Icon(
+                Icons.refresh,
+                color: Colors.white.withValues(alpha: 0.9),
+                size: 22,
+              ),
             ),
           ),
         ],
@@ -262,11 +264,7 @@ class _PowerballPageState extends State<PowerballPage>
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF2A1B3D),
-                Color(0xFF1E1233),
-                Color(0xFF16102B),
-              ],
+              colors: [Color(0xFF2A1B3D), Color(0xFF1E1233), Color(0xFF16102B)],
             ),
             border: Border.all(
               color: Color.lerp(
@@ -278,8 +276,9 @@ class _PowerballPageState extends State<PowerballPage>
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFFF4757)
-                    .withValues(alpha: 0.1 + glow * 0.15),
+                color: const Color(
+                  0xFFFF4757,
+                ).withValues(alpha: 0.1 + glow * 0.15),
                 blurRadius: 20 + glow * 15,
                 spreadRadius: -2,
               ),
@@ -317,7 +316,8 @@ class _PowerballPageState extends State<PowerballPage>
                 builder: (context, _) {
                   final scale = revealed
                       ? 1.0 +
-                          (1 - _ballControllers[i].value).clamp(0.0, 1.0) * 0.2
+                            (1 - _ballControllers[i].value).clamp(0.0, 1.0) *
+                                0.2
                       : 1.0;
                   return Transform.scale(
                     scale: scale,
@@ -343,8 +343,9 @@ class _PowerballPageState extends State<PowerballPage>
                         boxShadow: revealed
                             ? [
                                 BoxShadow(
-                                  color: const Color(0xFF3B7DDB)
-                                      .withValues(alpha: 0.5),
+                                  color: const Color(
+                                    0xFF3B7DDB,
+                                  ).withValues(alpha: 0.5),
                                   blurRadius: 12,
                                   spreadRadius: -2,
                                 ),
@@ -394,8 +395,7 @@ class _PowerballPageState extends State<PowerballPage>
       animation: _powerballController,
       builder: (context, _) {
         final scale = _showPowerball
-            ? 1.0 +
-                (1 - _powerballController.value).clamp(0.0, 1.0) * 0.3
+            ? 1.0 + (1 - _powerballController.value).clamp(0.0, 1.0) * 0.3
             : 1.0;
         return Transform.scale(
           scale: scale,
@@ -438,8 +438,9 @@ class _PowerballPageState extends State<PowerballPage>
                   boxShadow: _showPowerball
                       ? [
                           BoxShadow(
-                            color: const Color(0xFFFF4757)
-                                .withValues(alpha: 0.5),
+                            color: const Color(
+                              0xFFFF4757,
+                            ).withValues(alpha: 0.5),
                             blurRadius: 16,
                             spreadRadius: -2,
                           ),
@@ -488,8 +489,7 @@ class _PowerballPageState extends State<PowerballPage>
               Colors.white.withValues(alpha: 0.02),
             ],
           ),
-          border:
-              Border.all(color: Colors.white.withValues(alpha: 0.1)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
         ),
         child: Center(
           child: Text(
@@ -529,7 +529,8 @@ class _PowerballPageState extends State<PowerballPage>
                 : () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                          builder: (_) => const PowerballAiPage()),
+                        builder: (_) => const PowerballAiPage(),
+                      ),
                     );
                   },
           ),
@@ -552,8 +553,11 @@ class _PowerballPageState extends State<PowerballPage>
             padding: const EdgeInsets.only(left: 4, bottom: 8),
             child: Row(
               children: [
-                Icon(Icons.history,
-                    color: Colors.white.withValues(alpha: 0.5), size: 16),
+                Icon(
+                  Icons.history,
+                  color: Colors.white.withValues(alpha: 0.5),
+                  size: 16,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   '추첨 이력',
@@ -682,12 +686,14 @@ class _PowerballAiButton extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.auto_awesome,
-                    color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
-                    size: 18),
+                Icon(
+                  Icons.auto_awesome,
+                  color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
+                  size: 18,
+                ),
                 const SizedBox(width: 8),
                 Text(
-                  'AI 번호 생성기',
+                  'AI 확률 강화',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
                     fontSize: 14,
@@ -716,8 +722,7 @@ class _PowerballHistoryRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
         border: Border(
-          bottom:
-              BorderSide(color: Colors.white.withValues(alpha: 0.05)),
+          bottom: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
         ),
       ),
       child: FittedBox(
@@ -738,11 +743,13 @@ class _PowerballHistoryRow extends StatelessWidget {
             const SizedBox(width: 4),
             ...result.numbers.map((n) => _SmallBall(number: n)),
             const SizedBox(width: 6),
-            Text('+',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.4),
-                  fontSize: 13,
-                )),
+            Text(
+              '+',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.4),
+                fontSize: 13,
+              ),
+            ),
             const SizedBox(width: 6),
             _SmallPowerball(number: result.powerball),
           ],
@@ -864,8 +871,10 @@ class _PowerballConfettiState extends State<_PowerballConfetti>
       animation: _controller,
       builder: (context, _) {
         return CustomPaint(
-          painter:
-              _ConfettiPainter(particles: _particles, progress: _controller.value),
+          painter: _ConfettiPainter(
+            particles: _particles,
+            progress: _controller.value,
+          ),
           size: Size.infinite,
         );
       },
@@ -878,19 +887,19 @@ class _Particle {
   final Color color;
 
   _Particle(Random r)
-      : x = r.nextDouble(),
-        speed = 0.3 + r.nextDouble() * 0.7,
-        size = 4 + r.nextDouble() * 6,
-        drift = (r.nextDouble() - 0.5) * 0.3,
-        rotation = r.nextDouble() * pi * 2,
-        color = [
-          const Color(0xFFFF4757),
-          const Color(0xFFFF6B81),
-          const Color(0xFF5B9CFF),
-          const Color(0xFF3B7DDB),
-          const Color(0xFFFFD700),
-          const Color(0xFF6BCB77),
-        ][r.nextInt(6)];
+    : x = r.nextDouble(),
+      speed = 0.3 + r.nextDouble() * 0.7,
+      size = 4 + r.nextDouble() * 6,
+      drift = (r.nextDouble() - 0.5) * 0.3,
+      rotation = r.nextDouble() * pi * 2,
+      color = [
+        const Color(0xFFFF4757),
+        const Color(0xFFFF6B81),
+        const Color(0xFF5B9CFF),
+        const Color(0xFF3B7DDB),
+        const Color(0xFFFFD700),
+        const Color(0xFF6BCB77),
+      ][r.nextInt(6)];
 }
 
 class _ConfettiPainter extends CustomPainter {
@@ -912,7 +921,10 @@ class _ConfettiPainter extends CustomPainter {
       canvas.rotate(progress * pi * 2 * p.speed + p.rotation);
       canvas.drawRect(
         Rect.fromCenter(
-            center: Offset.zero, width: p.size, height: p.size * 0.6),
+          center: Offset.zero,
+          width: p.size,
+          height: p.size * 0.6,
+        ),
         paint,
       );
       canvas.restore();

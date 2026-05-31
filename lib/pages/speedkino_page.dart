@@ -129,11 +129,7 @@ class _SpeedkinoPageState extends State<SpeedkinoPage>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF1A1A2E),
-              Color(0xFF16213E),
-              Color(0xFF0F3460),
-            ],
+            colors: [Color(0xFF1A1A2E), Color(0xFF16213E), Color(0xFF0F3460)],
           ),
         ),
         child: SafeArea(
@@ -143,8 +139,9 @@ class _SpeedkinoPageState extends State<SpeedkinoPage>
                 builder: (context, constraints) {
                   return SingleChildScrollView(
                     child: ConstrainedBox(
-                      constraints:
-                          BoxConstraints(minHeight: constraints.maxHeight),
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
+                      ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -184,11 +181,13 @@ class _SpeedkinoPageState extends State<SpeedkinoPage>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white.withValues(alpha: 0.1),
-                border:
-                    Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
               ),
-              child:
-                  const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ),
           const Expanded(
@@ -224,10 +223,15 @@ class _SpeedkinoPageState extends State<SpeedkinoPage>
                 shape: BoxShape.circle,
                 color: Colors.black.withValues(alpha: 0.3),
                 border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.2), width: 1.5),
+                  color: Colors.white.withValues(alpha: 0.2),
+                  width: 1.5,
+                ),
               ),
-              child: Icon(Icons.refresh,
-                  color: Colors.white.withValues(alpha: 0.9), size: 22),
+              child: Icon(
+                Icons.refresh,
+                color: Colors.white.withValues(alpha: 0.9),
+                size: 22,
+              ),
             ),
           ),
         ],
@@ -248,11 +252,7 @@ class _SpeedkinoPageState extends State<SpeedkinoPage>
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF2A1B3D),
-                Color(0xFF1E1233),
-                Color(0xFF16102B),
-              ],
+              colors: [Color(0xFF2A1B3D), Color(0xFF1E1233), Color(0xFF16102B)],
             ),
             border: Border.all(
               color: Color.lerp(
@@ -264,8 +264,9 @@ class _SpeedkinoPageState extends State<SpeedkinoPage>
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF2ECC71)
-                    .withValues(alpha: 0.1 + glow * 0.15),
+                color: const Color(
+                  0xFF2ECC71,
+                ).withValues(alpha: 0.1 + glow * 0.15),
                 blurRadius: 20 + glow * 15,
                 spreadRadius: -2,
               ),
@@ -303,8 +304,8 @@ class _SpeedkinoPageState extends State<SpeedkinoPage>
                 builder: (context, _) {
                   final scale = revealed
                       ? 1.0 +
-                          (1 - _ballControllers[idx].value).clamp(0.0, 1.0) *
-                              0.2
+                            (1 - _ballControllers[idx].value).clamp(0.0, 1.0) *
+                                0.2
                       : 1.0;
                   final color = revealed
                       ? _ballColor(_revealedNumbers[idx])
@@ -396,7 +397,8 @@ class _SpeedkinoPageState extends State<SpeedkinoPage>
                 : () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                          builder: (_) => const SpeedkinoAiPage()),
+                        builder: (_) => const SpeedkinoAiPage(),
+                      ),
                     );
                   },
           ),
@@ -419,8 +421,11 @@ class _SpeedkinoPageState extends State<SpeedkinoPage>
             padding: const EdgeInsets.only(left: 4, bottom: 8),
             child: Row(
               children: [
-                Icon(Icons.history,
-                    color: Colors.white.withValues(alpha: 0.5), size: 16),
+                Icon(
+                  Icons.history,
+                  color: Colors.white.withValues(alpha: 0.5),
+                  size: 16,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   '추첨 이력',
@@ -545,12 +550,14 @@ class _AiButton extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.auto_awesome,
-                    color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
-                    size: 18),
+                Icon(
+                  Icons.auto_awesome,
+                  color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
+                  size: 18,
+                ),
                 const SizedBox(width: 8),
                 Text(
-                  'AI 번호 생성기',
+                  'AI 확률 강화',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
                     fontSize: 14,
@@ -612,9 +619,10 @@ class _HistoryRow extends StatelessWidget {
                   child: Text(
                     '$n',
                     style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700),
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               );
@@ -664,7 +672,9 @@ class _SpeedkinoConfettiState extends State<_SpeedkinoConfetti>
       builder: (context, _) {
         return CustomPaint(
           painter: _ConfettiPainter(
-              particles: _particles, progress: _controller.value),
+            particles: _particles,
+            progress: _controller.value,
+          ),
           size: Size.infinite,
         );
       },
@@ -677,19 +687,19 @@ class _Particle {
   final Color color;
 
   _Particle(Random r)
-      : x = r.nextDouble(),
-        speed = 0.3 + r.nextDouble() * 0.7,
-        size = 4 + r.nextDouble() * 6,
-        drift = (r.nextDouble() - 0.5) * 0.3,
-        rotation = r.nextDouble() * pi * 2,
-        color = [
-          const Color(0xFF2ECC71),
-          const Color(0xFF27AE60),
-          const Color(0xFFFFD93D),
-          const Color(0xFF4D96FF),
-          const Color(0xFFFF6B6B),
-          const Color(0xFF9B59B6),
-        ][r.nextInt(6)];
+    : x = r.nextDouble(),
+      speed = 0.3 + r.nextDouble() * 0.7,
+      size = 4 + r.nextDouble() * 6,
+      drift = (r.nextDouble() - 0.5) * 0.3,
+      rotation = r.nextDouble() * pi * 2,
+      color = [
+        const Color(0xFF2ECC71),
+        const Color(0xFF27AE60),
+        const Color(0xFFFFD93D),
+        const Color(0xFF4D96FF),
+        const Color(0xFFFF6B6B),
+        const Color(0xFF9B59B6),
+      ][r.nextInt(6)];
 }
 
 class _ConfettiPainter extends CustomPainter {
@@ -702,8 +712,8 @@ class _ConfettiPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     for (final p in particles) {
       final y = -20 + progress * size.height * p.speed * 1.5;
-      final x = p.x * size.width +
-          sin(progress * pi * 3 + p.rotation) * 30 * p.drift;
+      final x =
+          p.x * size.width + sin(progress * pi * 3 + p.rotation) * 30 * p.drift;
       final opacity = (1 - progress).clamp(0.0, 1.0);
       final paint = Paint()..color = p.color.withValues(alpha: opacity * 0.8);
       canvas.save();
@@ -711,7 +721,10 @@ class _ConfettiPainter extends CustomPainter {
       canvas.rotate(progress * pi * 2 * p.speed + p.rotation);
       canvas.drawRect(
         Rect.fromCenter(
-            center: Offset.zero, width: p.size, height: p.size * 0.6),
+          center: Offset.zero,
+          width: p.size,
+          height: p.size * 0.6,
+        ),
         paint,
       );
       canvas.restore();

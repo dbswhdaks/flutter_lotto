@@ -1,5 +1,6 @@
 import 'dart:math';
 import '../models/pension_draw.dart';
+import '../utils/recommendation_scoring.dart';
 
 class PensionAnalysisResult {
   final Map<int, int> groupFrequency;
@@ -115,13 +116,39 @@ class PensionAnalyzer {
     List<List<int>> cold,
   ) {
     final rng = Random();
+    PensionRecommendation improve(PensionRecommendation Function() picker) {
+      return RecommendationScoring.bestCandidate(
+        rng: rng,
+        picker: picker,
+        score: (rec) => _scorePensionRecommendation(rec, groupFreq, digitFreq),
+      );
+    }
+
     return [
-      _hotStrategy(groupFreq, hot, rng),
-      _coldStrategy(groupFreq, cold, digitFreq, rng),
-      _balancedStrategy(groupFreq, digitFreq, rng),
-      _frequencyWeightedStrategy(groupFreq, digitFreq, rng),
-      _patternStrategy(groupFreq, digitFreq, rng),
+      improve(() => _hotStrategy(groupFreq, hot, rng)),
+      improve(() => _coldStrategy(groupFreq, cold, digitFreq, rng)),
+      improve(() => _balancedStrategy(groupFreq, digitFreq, rng)),
+      improve(() => _frequencyWeightedStrategy(groupFreq, digitFreq, rng)),
+      improve(() => _patternStrategy(groupFreq, digitFreq, rng)),
     ];
+  }
+
+  double _scorePensionRecommendation(
+    PensionRecommendation rec,
+    Map<int, int> groupFreq,
+    List<Map<int, int>> digitFreq,
+  ) {
+    final maxGroupFreq = groupFreq.values.isEmpty
+        ? 1
+        : groupFreq.values.reduce(max);
+    final groupScore =
+        (groupFreq[rec.group] ?? 0) / (maxGroupFreq == 0 ? 1 : maxGroupFreq);
+
+    return RecommendationScoring.scoreDigitSequence(
+          rec.digits,
+          digitFrequency: digitFreq,
+        ) +
+        groupScore * 8;
   }
 
   /// 전략 1: 핫 숫자 중심 - 최근 자주 나온 숫자 위주

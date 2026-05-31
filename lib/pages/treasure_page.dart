@@ -147,11 +147,7 @@ class _TreasurePageState extends State<TreasurePage>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF1A1A2E),
-              Color(0xFF16213E),
-              Color(0xFF0F3460),
-            ],
+            colors: [Color(0xFF1A1A2E), Color(0xFF16213E), Color(0xFF0F3460)],
           ),
         ),
         child: SafeArea(
@@ -161,8 +157,9 @@ class _TreasurePageState extends State<TreasurePage>
                 builder: (context, constraints) {
                   return SingleChildScrollView(
                     child: ConstrainedBox(
-                      constraints:
-                          BoxConstraints(minHeight: constraints.maxHeight),
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
+                      ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -202,11 +199,13 @@ class _TreasurePageState extends State<TreasurePage>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white.withValues(alpha: 0.1),
-                border:
-                    Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
               ),
-              child:
-                  const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ),
           const Expanded(
@@ -242,10 +241,15 @@ class _TreasurePageState extends State<TreasurePage>
                 shape: BoxShape.circle,
                 color: Colors.black.withValues(alpha: 0.3),
                 border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.2), width: 1.5),
+                  color: Colors.white.withValues(alpha: 0.2),
+                  width: 1.5,
+                ),
               ),
-              child: Icon(Icons.refresh,
-                  color: Colors.white.withValues(alpha: 0.9), size: 22),
+              child: Icon(
+                Icons.refresh,
+                color: Colors.white.withValues(alpha: 0.9),
+                size: 22,
+              ),
             ),
           ),
         ],
@@ -266,11 +270,7 @@ class _TreasurePageState extends State<TreasurePage>
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF0D2818),
-                Color(0xFF0A1F14),
-                Color(0xFF081A10),
-              ],
+              colors: [Color(0xFF0D2818), Color(0xFF0A1F14), Color(0xFF081A10)],
             ),
             border: Border.all(
               color: Color.lerp(
@@ -282,8 +282,9 @@ class _TreasurePageState extends State<TreasurePage>
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF2ECC71)
-                    .withValues(alpha: 0.1 + glow * 0.15),
+                color: const Color(
+                  0xFF2ECC71,
+                ).withValues(alpha: 0.1 + glow * 0.15),
                 blurRadius: 20 + glow * 15,
                 spreadRadius: -2,
               ),
@@ -333,8 +334,11 @@ class _TreasurePageState extends State<TreasurePage>
                     builder: (context, _) {
                       final bounce = hasNumber
                           ? 1.0 +
-                              (1 - _ballControllers[i].value).clamp(0.0, 1.0) *
-                                  0.2
+                                (1 - _ballControllers[i].value).clamp(
+                                      0.0,
+                                      1.0,
+                                    ) *
+                                    0.2
                           : 1.0;
                       final color = hasNumber
                           ? _ballColor(_revealedNumbers[i])
@@ -372,14 +376,11 @@ class _TreasurePageState extends State<TreasurePage>
                               child: Padding(
                                 padding: const EdgeInsets.all(6),
                                 child: Text(
-                                  hasNumber
-                                      ? '${_revealedNumbers[i]}'
-                                      : '?',
+                                  hasNumber ? '${_revealedNumbers[i]}' : '?',
                                   style: TextStyle(
                                     color: hasNumber
                                         ? Colors.white
-                                        : Colors.white
-                                            .withValues(alpha: 0.2),
+                                        : Colors.white.withValues(alpha: 0.2),
                                     fontSize: 18,
                                     fontWeight: FontWeight.w900,
                                     shadows: hasNumber
@@ -418,8 +419,9 @@ class _TreasurePageState extends State<TreasurePage>
         AnimatedBuilder(
           animation: _treasureController,
           builder: (context, _) {
-            final bounce =
-                hasT ? 1.0 + (1 - _treasureController.value).clamp(0.0, 1.0) * 0.3 : 1.0;
+            final bounce = hasT
+                ? 1.0 + (1 - _treasureController.value).clamp(0.0, 1.0) * 0.3
+                : 1.0;
             return Transform.scale(
               scale: bounce,
               child: Container(
@@ -442,8 +444,9 @@ class _TreasurePageState extends State<TreasurePage>
                   boxShadow: hasT
                       ? [
                           BoxShadow(
-                            color:
-                                const Color(0xFFFFD700).withValues(alpha: 0.5),
+                            color: const Color(
+                              0xFFFFD700,
+                            ).withValues(alpha: 0.5),
                             blurRadius: 16,
                             spreadRadius: -2,
                           ),
@@ -520,8 +523,7 @@ class _TreasurePageState extends State<TreasurePage>
                 ? null
                 : () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
-                          builder: (_) => const TreasureAiPage()),
+                      MaterialPageRoute(builder: (_) => const TreasureAiPage()),
                     );
                   },
           ),
@@ -544,8 +546,11 @@ class _TreasurePageState extends State<TreasurePage>
             padding: const EdgeInsets.only(left: 4, bottom: 8),
             child: Row(
               children: [
-                Icon(Icons.history,
-                    color: Colors.white.withValues(alpha: 0.5), size: 16),
+                Icon(
+                  Icons.history,
+                  color: Colors.white.withValues(alpha: 0.5),
+                  size: 16,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   '추첨 이력',
@@ -573,9 +578,7 @@ class _TreasurePageState extends State<TreasurePage>
 
   Widget _buildConfettiOverlay() {
     return Positioned.fill(
-      child: IgnorePointer(
-        child: _TreasureConfetti(key: ValueKey(_drawCount)),
-      ),
+      child: IgnorePointer(child: _TreasureConfetti(key: ValueKey(_drawCount))),
     );
   }
 }
@@ -670,12 +673,14 @@ class _AiButton extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.auto_awesome,
-                    color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
-                    size: 18),
+                Icon(
+                  Icons.auto_awesome,
+                  color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
+                  size: 18,
+                ),
                 const SizedBox(width: 8),
                 Text(
-                  'AI 번호 생성기',
+                  'AI 확률 강화',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
                     fontSize: 14,
@@ -720,10 +725,12 @@ class _HistoryRow extends StatelessWidget {
                 fontSize: 10,
               ),
             ),
-            ...result.numbers.map((n) => Padding(
-                  padding: const EdgeInsets.only(right: 4),
-                  child: _mini(n, ballColor(n)),
-                )),
+            ...result.numbers.map(
+              (n) => Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: _mini(n, ballColor(n)),
+              ),
+            ),
             const SizedBox(width: 4),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
@@ -731,11 +738,14 @@ class _HistoryRow extends StatelessWidget {
                 borderRadius: BorderRadius.circular(4),
                 color: const Color(0xFFFFD700).withValues(alpha: 0.15),
               ),
-              child: const Text('T',
-                  style: TextStyle(
-                      color: Color(0xFFFFD700),
-                      fontSize: 8,
-                      fontWeight: FontWeight.w800)),
+              child: const Text(
+                'T',
+                style: TextStyle(
+                  color: Color(0xFFFFD700),
+                  fontSize: 8,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
             ),
             const SizedBox(width: 3),
             _mini(result.treasureNumber, const Color(0xFFFFD700)),
@@ -759,7 +769,10 @@ class _HistoryRow extends StatelessWidget {
         child: Text(
           '$n',
           style: const TextStyle(
-              color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700),
+            color: Colors.white,
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );
@@ -804,7 +817,9 @@ class _TreasureConfettiState extends State<_TreasureConfetti>
       builder: (context, _) {
         return CustomPaint(
           painter: _ConfettiPainter(
-              particles: _particles, progress: _controller.value),
+            particles: _particles,
+            progress: _controller.value,
+          ),
           size: Size.infinite,
         );
       },
@@ -817,19 +832,19 @@ class _Particle {
   final Color color;
 
   _Particle(Random r)
-      : x = r.nextDouble(),
-        speed = 0.3 + r.nextDouble() * 0.7,
-        size = 4 + r.nextDouble() * 6,
-        drift = (r.nextDouble() - 0.5) * 0.3,
-        rotation = r.nextDouble() * pi * 2,
-        color = [
-          const Color(0xFF2ECC71),
-          const Color(0xFF00E676),
-          const Color(0xFFFFD700),
-          const Color(0xFF1ABC9C),
-          const Color(0xFF76FF03),
-          const Color(0xFFA5D6A7),
-        ][r.nextInt(6)];
+    : x = r.nextDouble(),
+      speed = 0.3 + r.nextDouble() * 0.7,
+      size = 4 + r.nextDouble() * 6,
+      drift = (r.nextDouble() - 0.5) * 0.3,
+      rotation = r.nextDouble() * pi * 2,
+      color = [
+        const Color(0xFF2ECC71),
+        const Color(0xFF00E676),
+        const Color(0xFFFFD700),
+        const Color(0xFF1ABC9C),
+        const Color(0xFF76FF03),
+        const Color(0xFFA5D6A7),
+      ][r.nextInt(6)];
 }
 
 class _ConfettiPainter extends CustomPainter {
@@ -842,8 +857,8 @@ class _ConfettiPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     for (final p in particles) {
       final y = -20 + progress * size.height * p.speed * 1.5;
-      final x = p.x * size.width +
-          sin(progress * pi * 3 + p.rotation) * 30 * p.drift;
+      final x =
+          p.x * size.width + sin(progress * pi * 3 + p.rotation) * 30 * p.drift;
       final opacity = (1 - progress).clamp(0.0, 1.0);
       final paint = Paint()..color = p.color.withValues(alpha: opacity * 0.8);
       canvas.save();
@@ -852,7 +867,10 @@ class _ConfettiPainter extends CustomPainter {
       canvas.drawRRect(
         RRect.fromRectAndRadius(
           Rect.fromCenter(
-              center: Offset.zero, width: p.size, height: p.size * 0.5),
+            center: Offset.zero,
+            width: p.size,
+            height: p.size * 0.5,
+          ),
           const Radius.circular(1),
         ),
         paint,

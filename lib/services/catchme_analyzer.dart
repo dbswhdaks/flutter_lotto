@@ -1,5 +1,6 @@
 import 'dart:math';
 import '../models/catchme_draw.dart';
+import '../utils/recommendation_scoring.dart';
 
 class CatchmeAnalysisResult {
   final Map<int, int> frequency;
@@ -106,9 +107,7 @@ class CatchmeAnalyzer {
 
   Map<String, double> _getRangeDistribution() {
     if (draws.isEmpty) return {};
-    final ranges = {
-      '1-9': 0, '10-18': 0, '19-27': 0, '28-36': 0, '37-45': 0
-    };
+    final ranges = {'1-9': 0, '10-18': 0, '19-27': 0, '28-36': 0, '37-45': 0};
     for (final d in draws) {
       final n = d.drawnNumber;
       if (n <= 9) {
@@ -134,17 +133,45 @@ class CatchmeAnalyzer {
     List<int> overdue,
   ) {
     final rng = Random();
+    CatchmeRecommendation improve(CatchmeRecommendation Function() picker) {
+      return RecommendationScoring.bestCandidate(
+        rng: rng,
+        picker: picker,
+        score: (rec) =>
+            _scoreRecommendation(rec, freq, hot.toSet(), overdue.toSet()),
+        attempts: 40,
+      );
+    }
+
     return [
-      _hotStrategy(hot, rng),
-      _coldStrategy(cold, rng),
-      _overdueStrategy(overdue, rng),
-      _topFreqStrategy(freq),
-      _weightedRandomStrategy(freq, rng),
+      improve(() => _hotStrategy(hot, rng)),
+      improve(() => _coldStrategy(cold, rng)),
+      improve(() => _overdueStrategy(overdue, rng)),
+      improve(() => _topFreqStrategy(freq)),
+      improve(() => _weightedRandomStrategy(freq, rng)),
     ];
   }
 
+  double _scoreRecommendation(
+    CatchmeRecommendation rec,
+    Map<int, int> freq,
+    Set<int> hot,
+    Set<int> overdue,
+  ) {
+    final maxFrequency = freq.values.isEmpty ? 1 : freq.values.reduce(max);
+    final frequencyScore =
+        (freq[rec.number] ?? 0) / (maxFrequency == 0 ? 1 : maxFrequency);
+    final centerPenalty = (rec.number - 23).abs() * 0.05;
+    final hotBonus = hot.contains(rec.number) ? 2.5 : 0;
+    final overdueBonus = overdue.contains(rec.number) ? 1.5 : 0;
+
+    return frequencyScore * 10 + hotBonus + overdueBonus - centerPenalty;
+  }
+
   CatchmeRecommendation _hotStrategy(List<int> hot, Random rng) {
-    final pick = hot.isNotEmpty ? hot[rng.nextInt(hot.length)] : rng.nextInt(45) + 1;
+    final pick = hot.isNotEmpty
+        ? hot[rng.nextInt(hot.length)]
+        : rng.nextInt(45) + 1;
     return CatchmeRecommendation(
       strategy: '핫번호 중 랜덤',
       icon: '🔥',
@@ -153,7 +180,9 @@ class CatchmeAnalyzer {
   }
 
   CatchmeRecommendation _coldStrategy(List<int> cold, Random rng) {
-    final pick = cold.isNotEmpty ? cold[rng.nextInt(cold.length)] : rng.nextInt(45) + 1;
+    final pick = cold.isNotEmpty
+        ? cold[rng.nextInt(cold.length)]
+        : rng.nextInt(45) + 1;
     return CatchmeRecommendation(
       strategy: '콜드번호 반전 노림',
       icon: '❄️',
@@ -162,12 +191,10 @@ class CatchmeAnalyzer {
   }
 
   CatchmeRecommendation _overdueStrategy(List<int> overdue, Random rng) {
-    final pick = overdue.isNotEmpty ? overdue[rng.nextInt(overdue.length)] : rng.nextInt(45) + 1;
-    return CatchmeRecommendation(
-      strategy: '장기미출현 번호',
-      icon: '⏰',
-      number: pick,
-    );
+    final pick = overdue.isNotEmpty
+        ? overdue[rng.nextInt(overdue.length)]
+        : rng.nextInt(45) + 1;
+    return CatchmeRecommendation(strategy: '장기미출현 번호', icon: '⏰', number: pick);
   }
 
   CatchmeRecommendation _topFreqStrategy(Map<int, int> freq) {
@@ -181,7 +208,9 @@ class CatchmeAnalyzer {
   }
 
   CatchmeRecommendation _weightedRandomStrategy(
-      Map<int, int> freq, Random rng) {
+    Map<int, int> freq,
+    Random rng,
+  ) {
     final maxF = freq.values.reduce(max).toDouble();
     for (int a = 0; a < 500; a++) {
       final n = rng.nextInt(45) + 1;

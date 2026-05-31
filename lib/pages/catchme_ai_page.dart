@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/catchme_data_service.dart';
 import '../services/catchme_analyzer.dart';
+import '../widgets/ai_boost_badge.dart';
 
 class CatchmeAiPage extends StatefulWidget {
   const CatchmeAiPage({super.key});
@@ -63,8 +64,10 @@ class _CatchmeAiPageState extends State<CatchmeAiPage>
         backgroundColor: const Color(0xFF16213E),
         foregroundColor: Colors.white,
         centerTitle: true,
-        title: const Text('캐치미 번호 분석',
-            style: TextStyle(fontWeight: FontWeight.w800)),
+        title: const Text(
+          '캐치미 번호 분석',
+          style: TextStyle(fontWeight: FontWeight.w800),
+        ),
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: const Color(0xFFE91E63),
@@ -83,27 +86,28 @@ class _CatchmeAiPageState extends State<CatchmeAiPage>
                 children: [
                   CircularProgressIndicator(color: Color(0xFFE91E63)),
                   SizedBox(height: 16),
-                  Text('캐치미 데이터 로딩 중...',
-                      style: TextStyle(color: Colors.white70)),
+                  Text(
+                    '캐치미 데이터 로딩 중...',
+                    style: TextStyle(color: Colors.white70),
+                  ),
                 ],
               ),
             )
           : _error != null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Text(_error!,
-                        style: const TextStyle(color: Colors.redAccent),
-                        textAlign: TextAlign.center),
-                  ),
-                )
-              : TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildRecommendationTab(),
-                    _buildStatsTab(),
-                  ],
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Text(
+                  _error!,
+                  style: const TextStyle(color: Colors.redAccent),
+                  textAlign: TextAlign.center,
                 ),
+              ),
+            )
+          : TabBarView(
+              controller: _tabController,
+              children: [_buildRecommendationTab(), _buildStatsTab()],
+            ),
     );
   }
 
@@ -117,9 +121,11 @@ class _CatchmeAiPageState extends State<CatchmeAiPage>
           _sectionTitle('추천 번호 (5가지 전략)'),
           const SizedBox(height: 4),
           Text(
-            '과거 ${a.totalDraws}회 데이터 기반 분석 · 1개 번호 추천',
+            '과거 ${a.totalDraws}회 데이터 기반 후보 점수화 · 1개 번호 추천 · 당첨 보장 아님',
             style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 13,
+            ),
           ),
           const SizedBox(height: 16),
           ...a.recommendations.map((rec) => _buildRecCard(rec)),
@@ -135,10 +141,13 @@ class _CatchmeAiPageState extends State<CatchmeAiPage>
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFE91E63),
                 foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 14,
+                ),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30)),
+                  borderRadius: BorderRadius.circular(30),
+                ),
                 textStyle: const TextStyle(fontWeight: FontWeight.w800),
               ),
             ),
@@ -170,21 +179,29 @@ class _CatchmeAiPageState extends State<CatchmeAiPage>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE91E63).withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    '${rec.icon} ${rec.strategy}',
-                    style: const TextStyle(
-                      color: Color(0xFFFF80AB),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE91E63).withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${rec.icon} ${rec.strategy}',
+                        style: const TextStyle(
+                          color: Color(0xFFFF80AB),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    const AiBoostBadge(),
+                  ],
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -217,10 +234,13 @@ class _CatchmeAiPageState extends State<CatchmeAiPage>
           _sectionTitle('❄️ 콜드번호 (최근 30회 미출현)'),
           const SizedBox(height: 8),
           a.coldNumbers.isEmpty
-              ? Text('없음',
+              ? Text(
+                  '없음',
                   style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.5),
-                      fontSize: 13))
+                    color: Colors.white.withValues(alpha: 0.5),
+                    fontSize: 13,
+                  ),
+                )
               : _buildBallWrap(a.coldNumbers),
           const SizedBox(height: 20),
           _sectionTitle('⏰ 장기 미출현 번호'),
@@ -298,9 +318,10 @@ class _CatchmeAiPageState extends State<CatchmeAiPage>
               const SizedBox(width: 6),
               SizedBox(
                 width: 35,
-                child: Text('${e.value}회',
-                    style:
-                        const TextStyle(color: Colors.white70, fontSize: 12)),
+                child: Text(
+                  '${e.value}회',
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
               ),
             ],
           ),
@@ -316,8 +337,10 @@ class _CatchmeAiPageState extends State<CatchmeAiPage>
         children: [
           SizedBox(
             width: 50,
-            child: Text(label,
-                style: const TextStyle(color: Colors.white70, fontSize: 11)),
+            child: Text(
+              label,
+              style: const TextStyle(color: Colors.white70, fontSize: 11),
+            ),
           ),
           const SizedBox(width: 6),
           Expanded(
@@ -348,8 +371,10 @@ class _CatchmeAiPageState extends State<CatchmeAiPage>
           const SizedBox(width: 6),
           SizedBox(
             width: 45,
-            child: Text('${percent.toStringAsFixed(1)}%',
-                style: const TextStyle(color: Colors.white70, fontSize: 12)),
+            child: Text(
+              '${percent.toStringAsFixed(1)}%',
+              style: const TextStyle(color: Colors.white70, fontSize: 12),
+            ),
           ),
         ],
       ),
@@ -357,9 +382,14 @@ class _CatchmeAiPageState extends State<CatchmeAiPage>
   }
 
   Widget _sectionTitle(String text) {
-    return Text(text,
-        style: const TextStyle(
-            color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800));
+    return Text(
+      text,
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 16,
+        fontWeight: FontWeight.w800,
+      ),
+    );
   }
 
   Widget _statRow(String label, String value) {
@@ -368,13 +398,18 @@ class _CatchmeAiPageState extends State<CatchmeAiPage>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style: const TextStyle(color: Colors.white70, fontSize: 14)),
-          Text(value,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700)),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ],
       ),
     );
@@ -386,11 +421,7 @@ class _CatchBall extends StatelessWidget {
   final Color color;
   final double size;
 
-  const _CatchBall({
-    required this.number,
-    required this.color,
-    this.size = 38,
-  });
+  const _CatchBall({required this.number, required this.color, this.size = 38});
 
   @override
   Widget build(BuildContext context) {
@@ -425,9 +456,10 @@ class _CatchBall extends StatelessWidget {
             fontWeight: FontWeight.w900,
             shadows: const [
               Shadow(
-                  color: Color(0x55000000),
-                  offset: Offset(0, 1),
-                  blurRadius: 2),
+                color: Color(0x55000000),
+                offset: Offset(0, 1),
+                blurRadius: 2,
+              ),
             ],
           ),
         ),

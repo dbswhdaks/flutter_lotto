@@ -192,158 +192,270 @@ class _LottoHomePageState extends State<LottoHomePage> {
     final upwardPath = _buildUpwardPath(screenWidth);
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF0B0F1F),
+                  Color(0xFF111935),
+                  Color(0xFF0A1F3D),
+                ],
+              ),
+            ),
+          ),
+          const Positioned(
+            top: -90,
+            left: -70,
+            child: _GlowOrb(color: Color(0xFF7C3AED), size: 260, opacity: 0.20),
+          ),
+          const Positioned(
+            top: 280,
+            right: -110,
+            child: _GlowOrb(color: Color(0xFFA855F7), size: 240, opacity: 0.13),
+          ),
+          const Positioned(
+            bottom: -110,
+            left: -60,
+            child: _GlowOrb(color: Color(0xFFF59E0B), size: 240, opacity: 0.09),
+          ),
+          SafeArea(
+            child: Stack(
+              children: [
+                SingleChildScrollView(
+                  controller: _scrollController,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 28),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          children: [
+                            _BackButton(
+                              onTap: () => Navigator.of(context).pop(),
+                            ),
+                            Expanded(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text(
+                                    '🎱 ',
+                                    style: TextStyle(fontSize: 22),
+                                  ),
+                                  Flexible(
+                                    child: ShaderMask(
+                                      shaderCallback: (rect) =>
+                                          const LinearGradient(
+                                            begin: Alignment.centerLeft,
+                                            end: Alignment.centerRight,
+                                            colors: [
+                                              Color(0xFFFFE08A),
+                                              Color(0xFFF5A623),
+                                              Color(0xFFFF8A65),
+                                            ],
+                                          ).createShader(rect),
+                                      child: const Text(
+                                        '6/45 로또 번호 생성기',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: -0.5,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 36),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        '행운의 번호를 뽑아보세요!',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          LottoMachine(
+                            key: _machineKey,
+                            isSpinning: _isDrawing,
+                            sphereSize: _sphereSize,
+                            excludeNumbers: _currentResult != null
+                                ? [
+                                    ..._currentResult!.mainNumbers,
+                                    _currentResult!.bonusNumber,
+                                  ]
+                                : null,
+                          ),
+                          Positioned(
+                            right:
+                                (MediaQuery.of(context).size.width -
+                                        _sphereSize) /
+                                    2 -
+                                36,
+                            bottom: 40,
+                            child: _ResetButton(onPressed: _reset),
+                          ),
+                        ],
+                      ),
+                      Transform.translate(
+                        offset: const Offset(0, -12),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: ResultPanel(
+                            result: _currentResult,
+                            revealedNumbers: _revealedNumbers,
+                            showPlus: _showPlus,
+                            showBonus: _showBonus,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: _DrawButton(
+                                onPressed: _isDrawing ? null : _startDraw,
+                                isDrawing: _isDrawing,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _AiButton(
+                                onPressed: _isDrawing
+                                    ? null
+                                    : () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (_) => const AiPage(),
+                                          ),
+                                        );
+                                      },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      const _TodayLuckyNumbers(),
+                      const SizedBox(height: 20),
+                      HistoryPanel(history: _history),
+                      const SizedBox(height: 30),
+                    ],
+                  ),
+                ),
+
+                if (_travelingNumber != null)
+                  TravelingBall(
+                    key: ValueKey(
+                      'ball_${_travelingNumber}_${_revealedNumbers.length}',
+                    ),
+                    number: _travelingNumber!,
+                    path: upwardPath,
+                    onArrived: _onBallArrived,
+                    duration: _travelDuration,
+                  ),
+
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: ConfettiOverlay(trigger: _showConfetti),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GlowOrb extends StatelessWidget {
+  final Color color;
+  final double size;
+  final double opacity;
+
+  const _GlowOrb({
+    required this.color,
+    required this.size,
+    required this.opacity,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(
+            colors: [
+              color.withValues(alpha: opacity),
+              color.withValues(alpha: 0),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BackButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _BackButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF1A1A2E),
-              Color(0xFF16213E),
-              Color(0xFF0F3460),
+              Colors.white.withValues(alpha: 0.12),
+              Colors.white.withValues(alpha: 0.04),
             ],
           ),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.22),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.25),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        child: SafeArea(
-          child: Stack(
-            children: [
-              SingleChildScrollView(
-                controller: _scrollController,
-                child: Column(
-                  children: [
-                    const SizedBox(height: 28),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () => Navigator.of(context).pop(),
-                            child: Container(
-                              width: 36,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white.withValues(alpha: 0.1),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.2),
-                                ),
-                              ),
-                              child: const Icon(Icons.arrow_back, color: Colors.white, size: 18),
-                            ),
-                          ),
-                          const Expanded(
-                            child: Text(
-                              '🎱 6/45 로또 번호 생성기',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 22,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 36),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      '행운의 번호를 뽑아보세요!',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
-                        fontSize: 13,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        LottoMachine(
-                          key: _machineKey,
-                          isSpinning: _isDrawing,
-                          sphereSize: _sphereSize,
-                          excludeNumbers: _currentResult != null
-                              ? [
-                                  ..._currentResult!.mainNumbers,
-                                  _currentResult!.bonusNumber,
-                                ]
-                              : null,
-                        ),
-                        Positioned(
-                          right: (MediaQuery.of(context).size.width - _sphereSize) / 2 - 36,
-                          bottom: 40,
-                          child: _ResetButton(onPressed: _reset),
-                        ),
-                      ],
-                    ),
-                    Transform.translate(
-                      offset: const Offset(0, -12),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: ResultPanel(
-                          result: _currentResult,
-                          revealedNumbers: _revealedNumbers,
-                          showPlus: _showPlus,
-                          showBonus: _showBonus,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: _DrawButton(
-                              onPressed: _isDrawing ? null : _startDraw,
-                              isDrawing: _isDrawing,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _AiButton(
-                              onPressed: _isDrawing
-                                  ? null
-                                  : () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                            builder: (_) =>
-                                                const AiPage()),
-                                      );
-                                    },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    const _TodayLuckyNumbers(),
-                    const SizedBox(height: 20),
-                    HistoryPanel(history: _history),
-                    const SizedBox(height: 30),
-                  ],
-                ),
-              ),
-
-              // 위로 올라가는 추첨 공
-              if (_travelingNumber != null)
-                TravelingBall(
-                  key: ValueKey(
-                      'ball_${_travelingNumber}_${_revealedNumbers.length}'),
-                  number: _travelingNumber!,
-                  path: upwardPath,
-                  onArrived: _onBallArrived,
-                  duration: _travelDuration,
-                ),
-
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: ConfettiOverlay(trigger: _showConfetti),
-                ),
-              ),
-            ],
-          ),
+        child: const Icon(
+          Icons.arrow_back_ios_new_rounded,
+          color: Colors.white,
+          size: 16,
         ),
       ),
     );
@@ -390,33 +502,45 @@ class _DrawButtonState extends State<_DrawButton>
     return AnimatedBuilder(
       animation: _pulseAnim,
       builder: (context, child) {
-        final glowOpacity = widget.isDrawing ? 0.1 : 0.2 + _pulseAnim.value * 0.25;
+        final glowOpacity = widget.isDrawing
+            ? 0.10
+            : 0.22 + _pulseAnim.value * 0.28;
         return Container(
           height: 72,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(22),
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: widget.isDrawing
-                  ? [const Color(0xFF5B21B6), const Color(0xFF7C3AED)]
-                  : [const Color(0xFF7C3AED), const Color(0xFFA855F7)],
+                  ? const [
+                      Color(0xFF5B21B6),
+                      Color(0xFF7C3AED),
+                      Color(0xFF8B5CF6),
+                    ]
+                  : const [
+                      Color(0xFF7C3AED),
+                      Color(0xFFA855F7),
+                      Color(0xFFC084FC),
+                    ],
             ),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.15),
-              width: 1,
+              color: Colors.white.withValues(alpha: 0.18),
+              width: 1.2,
             ),
             boxShadow: [
               BoxShadow(
                 color: const Color(0xFF7C3AED).withValues(alpha: glowOpacity),
-                blurRadius: 20,
-                spreadRadius: 2,
-                offset: const Offset(0, 4),
+                blurRadius: 26,
+                spreadRadius: 1,
+                offset: const Offset(0, 8),
               ),
               BoxShadow(
-                color: const Color(0xFFA855F7).withValues(alpha: glowOpacity * 0.5),
-                blurRadius: 40,
-                spreadRadius: -4,
+                color: const Color(
+                  0xFFA855F7,
+                ).withValues(alpha: glowOpacity * 0.5),
+                blurRadius: 50,
+                spreadRadius: -8,
               ),
             ],
           ),
@@ -426,19 +550,40 @@ class _DrawButtonState extends State<_DrawButton>
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(22),
           onTap: widget.onPressed,
           child: Stack(
             children: [
               Positioned(
-                top: -10,
-                right: -10,
+                top: 0,
+                left: 0,
+                right: 0,
                 child: Container(
-                  width: 50,
-                  height: 50,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(22),
+                    ),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.white.withValues(alpha: 0.20),
+                        Colors.white.withValues(alpha: 0),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: -12,
+                right: -12,
+                child: Container(
+                  width: 56,
+                  height: 56,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.05),
+                    color: Colors.white.withValues(alpha: 0.06),
                   ),
                 ),
               ),
@@ -451,11 +596,26 @@ class _DrawButtonState extends State<_DrawButton>
                       height: 34,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white.withValues(alpha: 0.15),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.white.withValues(alpha: 0.28),
+                            Colors.white.withValues(alpha: 0.10),
+                          ],
+                        ),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.20),
+                          width: 0.8,
+                        ),
                       ),
                       child: Icon(
-                        widget.isDrawing ? Icons.hourglass_top : Icons.casino_rounded,
-                        color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
+                        widget.isDrawing
+                            ? Icons.hourglass_top
+                            : Icons.casino_rounded,
+                        color: Colors.white.withValues(
+                          alpha: enabled ? 1 : 0.5,
+                        ),
                         size: 19,
                       ),
                     ),
@@ -463,7 +623,9 @@ class _DrawButtonState extends State<_DrawButton>
                     Text(
                       widget.isDrawing ? '추첨 중...' : '추첨 시작',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
+                        color: Colors.white.withValues(
+                          alpha: enabled ? 1 : 0.5,
+                        ),
                         fontSize: 13,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.5,
@@ -495,16 +657,30 @@ class _ResetButton extends StatelessWidget {
         height: 46,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.black.withValues(alpha: 0.3),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.black.withValues(alpha: 0.45),
+              Colors.black.withValues(alpha: 0.20),
+            ],
+          ),
           border: Border.all(
-            color: Colors.white.withValues(alpha: 0.2),
+            color: Colors.white.withValues(alpha: 0.25),
             width: 1.5,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.4),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Icon(
-          Icons.refresh,
-          color: Colors.white.withValues(alpha: enabled ? 0.9 : 0.4),
-          size: 27,
+          Icons.refresh_rounded,
+          color: Colors.white.withValues(alpha: enabled ? 0.95 : 0.4),
+          size: 26,
         ),
       ),
     );
@@ -553,27 +729,27 @@ class _AiButtonState extends State<_AiButton>
         return Container(
           height: 72,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(22),
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [Color(0xFF0EA5E9), Color(0xFF3B82F6), Color(0xFF6366F1)],
             ),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.15),
-              width: 1,
+              color: Colors.white.withValues(alpha: 0.18),
+              width: 1.2,
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF3B82F6).withValues(alpha: 0.3),
-                blurRadius: 16,
+                color: const Color(0xFF3B82F6).withValues(alpha: 0.32),
+                blurRadius: 22,
                 spreadRadius: 1,
-                offset: const Offset(0, 4),
+                offset: const Offset(0, 8),
               ),
               BoxShadow(
-                color: const Color(0xFF6366F1).withValues(alpha: 0.15),
-                blurRadius: 30,
-                spreadRadius: -4,
+                color: const Color(0xFF6366F1).withValues(alpha: 0.18),
+                blurRadius: 40,
+                spreadRadius: -6,
               ),
             ],
           ),
@@ -583,19 +759,40 @@ class _AiButtonState extends State<_AiButton>
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(22),
           onTap: widget.onPressed,
           child: Stack(
             children: [
               Positioned(
-                bottom: -8,
-                left: -8,
+                top: 0,
+                left: 0,
+                right: 0,
                 child: Container(
-                  width: 45,
-                  height: 45,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(22),
+                    ),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.white.withValues(alpha: 0.20),
+                        Colors.white.withValues(alpha: 0),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: -10,
+                left: -10,
+                child: Container(
+                  width: 50,
+                  height: 50,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.05),
+                    color: Colors.white.withValues(alpha: 0.06),
                   ),
                 ),
               ),
@@ -612,22 +809,30 @@ class _AiButtonState extends State<_AiButton>
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [
-                            Colors.white.withValues(alpha: 0.2),
-                            Colors.white.withValues(alpha: 0.08),
+                            Colors.white.withValues(alpha: 0.28),
+                            Colors.white.withValues(alpha: 0.10),
                           ],
+                        ),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.20),
+                          width: 0.8,
                         ),
                       ),
                       child: Icon(
                         Icons.auto_awesome,
-                        color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
+                        color: Colors.white.withValues(
+                          alpha: enabled ? 1 : 0.5,
+                        ),
                         size: 19,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'AI 번호 생성기',
+                      'AI 확률 강화',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
+                        color: Colors.white.withValues(
+                          alpha: enabled ? 1 : 0.5,
+                        ),
                         fontSize: 13,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.3,
@@ -666,7 +871,10 @@ class _TodayLuckyNumbersState extends State<_TodayLuckyNumbers>
       vsync: this,
       duration: const Duration(milliseconds: 800),
     )..forward();
-    _fadeAnim = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
+    _fadeAnim = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    );
   }
 
   List<int> _generateLucky() {
@@ -719,25 +927,31 @@ class _TodayLuckyNumbersState extends State<_TodayLuckyNumbers>
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(22),
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              const Color(0xFFF59E0B).withValues(alpha: 0.12),
-              const Color(0xFFF97316).withValues(alpha: 0.08),
+              const Color(0xFFF59E0B).withValues(alpha: 0.16),
+              const Color(0xFFF97316).withValues(alpha: 0.10),
               const Color(0xFFEF4444).withValues(alpha: 0.06),
             ],
           ),
           border: Border.all(
-            color: const Color(0xFFF59E0B).withValues(alpha: 0.25),
-            width: 1.5,
+            color: const Color(0xFFF59E0B).withValues(alpha: 0.30),
+            width: 1.3,
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFF59E0B).withValues(alpha: 0.1),
-              blurRadius: 20,
+              color: const Color(0xFFF59E0B).withValues(alpha: 0.18),
+              blurRadius: 26,
               spreadRadius: -4,
+              offset: const Offset(0, 8),
+            ),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.25),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
@@ -746,56 +960,93 @@ class _TodayLuckyNumbersState extends State<_TodayLuckyNumbers>
             Container(
               padding: const EdgeInsets.fromLTRB(16, 14, 12, 10),
               decoration: BoxDecoration(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(19)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(21),
+                ),
                 gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                   colors: [
-                    const Color(0xFFF59E0B).withValues(alpha: 0.15),
+                    const Color(0xFFF59E0B).withValues(alpha: 0.20),
                     Colors.transparent,
                   ],
                 ),
               ),
               child: Row(
                 children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Color(0xFFFBBF24), Color(0xFFF59E0B)],
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFFF59E0B).withValues(alpha: 0.4),
-                          blurRadius: 8,
-                          spreadRadius: -2,
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        width: 34,
+                        height: 34,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: const LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Color(0xFFFFD56B),
+                              Color(0xFFFBBF24),
+                              Color(0xFFF59E0B),
+                            ],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(
+                                0xFFF59E0B,
+                              ).withValues(alpha: 0.55),
+                              blurRadius: 12,
+                              spreadRadius: -2,
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: const Icon(Icons.stars_rounded, color: Colors.white, size: 18),
+                        child: const Icon(
+                          Icons.stars_rounded,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ),
+                      Positioned(
+                        top: 5,
+                        left: 7,
+                        child: Container(
+                          width: 7,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.55),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          '오늘의 행운 추천번호',
-                          style: TextStyle(
-                            color: Color(0xFFFBBF24),
-                            fontSize: 15,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.3,
+                        ShaderMask(
+                          shaderCallback: (rect) => const LinearGradient(
+                            colors: [Color(0xFFFFE08A), Color(0xFFFBBF24)],
+                          ).createShader(rect),
+                          child: const Text(
+                            '오늘의 행운 추천번호',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.3,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           _getTodayDateString(),
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.45),
+                            color: Colors.white.withValues(alpha: 0.5),
                             fontSize: 11,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
@@ -808,9 +1059,18 @@ class _TodayLuckyNumbersState extends State<_TodayLuckyNumbers>
                       height: 34,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white.withValues(alpha: 0.08),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.white.withValues(alpha: 0.12),
+                            Colors.white.withValues(alpha: 0.04),
+                          ],
+                        ),
                         border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.12),
+                          color: const Color(
+                            0xFFFBBF24,
+                          ).withValues(alpha: 0.30),
                         ),
                       ),
                       child: const Icon(
@@ -845,16 +1105,17 @@ class _TodayLuckyNumbersState extends State<_TodayLuckyNumbers>
                 children: [
                   Icon(
                     Icons.auto_awesome,
-                    color: const Color(0xFFFBBF24).withValues(alpha: 0.5),
+                    color: const Color(0xFFFBBF24).withValues(alpha: 0.6),
                     size: 13,
                   ),
                   const SizedBox(width: 6),
                   Text(
                     _getLuckyMessage(),
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.5),
+                      color: Colors.white.withValues(alpha: 0.55),
                       fontSize: 12,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.2,
                     ),
                   ),
                 ],
@@ -866,4 +1127,3 @@ class _TodayLuckyNumbersState extends State<_TodayLuckyNumbers>
     );
   }
 }
-

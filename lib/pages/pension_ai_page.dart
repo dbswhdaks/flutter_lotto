@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/pension_data_service.dart';
 import '../services/pension_analyzer.dart';
+import '../widgets/ai_boost_badge.dart';
 
 class PensionAiPage extends StatefulWidget {
   const PensionAiPage({super.key});
@@ -85,23 +86,20 @@ class _PensionAiPageState extends State<PensionAiPage>
               ),
             )
           : _error != null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Text(
-                      _error!,
-                      style: const TextStyle(color: Colors.redAccent),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                )
-              : TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildRecommendationTab(),
-                    _buildStatsTab(),
-                  ],
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Text(
+                  _error!,
+                  style: const TextStyle(color: Colors.redAccent),
+                  textAlign: TextAlign.center,
                 ),
+              ),
+            )
+          : TabBarView(
+              controller: _tabController,
+              children: [_buildRecommendationTab(), _buildStatsTab()],
+            ),
     );
   }
 
@@ -116,7 +114,7 @@ class _PensionAiPageState extends State<PensionAiPage>
           _sectionTitle('추천 번호 (5세트)'),
           const SizedBox(height: 4),
           Text(
-            '과거 ${a.totalDraws}회 데이터 기반 분석',
+            '과거 ${a.totalDraws}회 데이터 기반 후보 점수화 · 당첨 보장 아님',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.5),
               fontSize: 13,
@@ -136,8 +134,10 @@ class _PensionAiPageState extends State<PensionAiPage>
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFFD700),
                 foregroundColor: const Color(0xFF1A1A2E),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 14,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30),
                 ),
@@ -171,8 +171,10 @@ class _PensionAiPageState extends State<PensionAiPage>
           Row(
             children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFFFD700).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
@@ -186,6 +188,8 @@ class _PensionAiPageState extends State<PensionAiPage>
                   ),
                 ),
               ),
+              const SizedBox(width: 8),
+              const AiBoostBadge(),
             ],
           ),
           const SizedBox(height: 14),
@@ -199,10 +203,7 @@ class _PensionAiPageState extends State<PensionAiPage>
                 ...List.generate(6, (i) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 3),
-                    child: _DigitBox(
-                      digit: rec.digits[i],
-                      index: i,
-                    ),
+                    child: _DigitBox(digit: rec.digits[i], index: i),
                   );
                 }),
               ],
@@ -247,8 +248,7 @@ class _PensionAiPageState extends State<PensionAiPage>
   }
 
   Widget _buildGroupChart(Map<int, int> groupFreq) {
-    final maxVal =
-        groupFreq.values.fold(0, (a, b) => a > b ? a : b).toDouble();
+    final maxVal = groupFreq.values.fold(0, (a, b) => a > b ? a : b).toDouble();
 
     return Column(
       children: groupFreq.entries.map((e) {
@@ -441,8 +441,10 @@ class _PensionAiPageState extends State<PensionAiPage>
                     width: 30,
                     child: Text(
                       '${e.value}',
-                      style:
-                          const TextStyle(color: Colors.white54, fontSize: 11),
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 11,
+                      ),
                     ),
                   ),
                 ],
@@ -472,8 +474,10 @@ class _PensionAiPageState extends State<PensionAiPage>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style: const TextStyle(color: Colors.white70, fontSize: 14)),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
+          ),
           Text(
             value,
             style: const TextStyle(

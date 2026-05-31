@@ -1,5 +1,6 @@
 import 'dart:math';
 import '../models/megabingo_draw.dart';
+import '../utils/recommendation_scoring.dart';
 
 class MegabingoAnalysisResult {
   final Map<int, int> frequency;
@@ -50,7 +51,14 @@ class MegabingoAnalyzer {
     final range = _getRangeDistribution();
     final oddRatio = _getAvgOddRatio();
     final avgSum = _getAvgSum();
-    final recs = _generateRecommendations(freq, hot, cold, overdue);
+    final recs = _generateRecommendations(
+      freq,
+      hot,
+      cold,
+      overdue,
+      avgSum,
+      oddRatio,
+    );
 
     return MegabingoAnalysisResult(
       frequency: freq,
@@ -153,19 +161,43 @@ class MegabingoAnalyzer {
     List<int> hot,
     List<int> cold,
     List<int> overdue,
+    double avgSum,
+    double avgOddRatio,
   ) {
     final rng = Random();
+    MegabingoRecommendation improve(MegabingoRecommendation Function() picker) {
+      return RecommendationScoring.bestCandidate(
+        rng: rng,
+        picker: picker,
+        score: (rec) => RecommendationScoring.scoreNumbers(
+          rec.numbers,
+          frequency: freq,
+          minNumber: 1,
+          maxNumber: 40,
+          targetCount: 20,
+          targetSum: avgSum,
+          targetOddRatio: avgOddRatio,
+          preferredNumbers: hot.toSet(),
+          secondaryPreferredNumbers: overdue.toSet(),
+        ),
+        attempts: 60,
+      );
+    }
+
     return [
-      _hotStrategy(hot, freq, rng),
-      _coldStrategy(cold, freq, rng),
-      _mixedStrategy(hot, overdue, freq, rng),
-      _rangeBalancedStrategy(rng),
-      _weightedRandomStrategy(freq, rng),
+      improve(() => _hotStrategy(hot, freq, rng)),
+      improve(() => _coldStrategy(cold, freq, rng)),
+      improve(() => _mixedStrategy(hot, overdue, freq, rng)),
+      improve(() => _rangeBalancedStrategy(rng)),
+      improve(() => _weightedRandomStrategy(freq, rng)),
     ];
   }
 
   MegabingoRecommendation _hotStrategy(
-      List<int> hot, Map<int, int> freq, Random rng) {
+    List<int> hot,
+    Map<int, int> freq,
+    Random rng,
+  ) {
     final pool = <int>{...hot};
     final sorted = freq.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
@@ -182,7 +214,10 @@ class MegabingoAnalyzer {
   }
 
   MegabingoRecommendation _coldStrategy(
-      List<int> cold, Map<int, int> freq, Random rng) {
+    List<int> cold,
+    Map<int, int> freq,
+    Random rng,
+  ) {
     final picked = <int>{};
     final coldList = List<int>.from(cold)..shuffle(rng);
     for (final n in coldList.take(6)) {
@@ -202,7 +237,11 @@ class MegabingoAnalyzer {
   }
 
   MegabingoRecommendation _mixedStrategy(
-      List<int> hot, List<int> overdue, Map<int, int> freq, Random rng) {
+    List<int> hot,
+    List<int> overdue,
+    Map<int, int> freq,
+    Random rng,
+  ) {
     final picked = <int>{};
     final hotS = List<int>.from(hot)..shuffle(rng);
     final overdueS = List<int>.from(overdue)..shuffle(rng);
@@ -246,7 +285,9 @@ class MegabingoAnalyzer {
   }
 
   MegabingoRecommendation _weightedRandomStrategy(
-      Map<int, int> freq, Random rng) {
+    Map<int, int> freq,
+    Random rng,
+  ) {
     final maxF = freq.values.reduce(max).toDouble();
     final picked = <int>{};
     int attempts = 0;

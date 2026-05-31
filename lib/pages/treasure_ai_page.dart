@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/treasure_data_service.dart';
 import '../services/treasure_analyzer.dart';
+import '../widgets/ai_boost_badge.dart';
 
 class TreasureAiPage extends StatefulWidget {
   const TreasureAiPage({super.key});
@@ -63,8 +64,10 @@ class _TreasureAiPageState extends State<TreasureAiPage>
         backgroundColor: const Color(0xFF16213E),
         foregroundColor: Colors.white,
         centerTitle: true,
-        title: const Text('트레져헌터 번호 분석',
-            style: TextStyle(fontWeight: FontWeight.w800)),
+        title: const Text(
+          '트레져헌터 번호 분석',
+          style: TextStyle(fontWeight: FontWeight.w800),
+        ),
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: const Color(0xFF2ECC71),
@@ -83,27 +86,28 @@ class _TreasureAiPageState extends State<TreasureAiPage>
                 children: [
                   CircularProgressIndicator(color: Color(0xFF2ECC71)),
                   SizedBox(height: 16),
-                  Text('트레져헌터 데이터 로딩 중...',
-                      style: TextStyle(color: Colors.white70)),
+                  Text(
+                    '트레져헌터 데이터 로딩 중...',
+                    style: TextStyle(color: Colors.white70),
+                  ),
                 ],
               ),
             )
           : _error != null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Text(_error!,
-                        style: const TextStyle(color: Colors.redAccent),
-                        textAlign: TextAlign.center),
-                  ),
-                )
-              : TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildRecommendationTab(),
-                    _buildStatsTab(),
-                  ],
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Text(
+                  _error!,
+                  style: const TextStyle(color: Colors.redAccent),
+                  textAlign: TextAlign.center,
                 ),
+              ),
+            )
+          : TabBarView(
+              controller: _tabController,
+              children: [_buildRecommendationTab(), _buildStatsTab()],
+            ),
     );
   }
 
@@ -117,9 +121,11 @@ class _TreasureAiPageState extends State<TreasureAiPage>
           _sectionTitle('추천 번호 (5세트)'),
           const SizedBox(height: 4),
           Text(
-            '과거 ${a.totalDraws}회 데이터 기반 분석',
+            '과거 ${a.totalDraws}회 데이터 기반 후보 점수화 · 당첨 보장 아님',
             style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 13,
+            ),
           ),
           const SizedBox(height: 16),
           ...a.recommendations.map((rec) => _buildRecCard(rec)),
@@ -135,10 +141,13 @@ class _TreasureAiPageState extends State<TreasureAiPage>
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2ECC71),
                 foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 14,
+                ),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30)),
+                  borderRadius: BorderRadius.circular(30),
+                ),
                 textStyle: const TextStyle(fontWeight: FontWeight.w800),
               ),
             ),
@@ -166,20 +175,29 @@ class _TreasureAiPageState extends State<TreasureAiPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: const Color(0xFF2ECC71).withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              '${rec.icon} ${rec.strategy}',
-              style: const TextStyle(
-                color: Color(0xFF00E676),
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2ECC71).withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${rec.icon} ${rec.strategy}',
+                  style: const TextStyle(
+                    color: Color(0xFF00E676),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(width: 8),
+              const AiBoostBadge(),
+            ],
           ),
           const SizedBox(height: 12),
           Row(
@@ -194,8 +212,7 @@ class _TreasureAiPageState extends State<TreasureAiPage>
                       spacing: 6,
                       runSpacing: 6,
                       children: rec.numbers
-                          .map((n) =>
-                              _GemBall(number: n, color: _ballColor(n)))
+                          .map((n) => _GemBall(number: n, color: _ballColor(n)))
                           .toList(),
                     ),
                   ],
@@ -253,10 +270,13 @@ class _TreasureAiPageState extends State<TreasureAiPage>
           _sectionTitle('❄️ 콜드번호 (최근 30회 미출현)'),
           const SizedBox(height: 8),
           a.coldNumbers.isEmpty
-              ? Text('없음',
+              ? Text(
+                  '없음',
                   style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.5),
-                      fontSize: 13))
+                    color: Colors.white.withValues(alpha: 0.5),
+                    fontSize: 13,
+                  ),
+                )
               : _buildBallWrap(a.coldNumbers),
           const SizedBox(height: 20),
           _sectionTitle('⏰ 장기 미출현 번호'),
@@ -269,8 +289,13 @@ class _TreasureAiPageState extends State<TreasureAiPage>
             spacing: 8,
             runSpacing: 8,
             children: a.hotTreasures
-                .map((n) => _GemBall(
-                    number: n, color: const Color(0xFFFFD700), size: 40))
+                .map(
+                  (n) => _GemBall(
+                    number: n,
+                    color: const Color(0xFFFFD700),
+                    size: 40,
+                  ),
+                )
                 .toList(),
           ),
           const SizedBox(height: 20),
@@ -283,8 +308,7 @@ class _TreasureAiPageState extends State<TreasureAiPage>
           ...a.rangeDistribution.entries.map((e) => _buildBar(e.key, e.value)),
           const SizedBox(height: 20),
           _sectionTitle('📈 기본 통계'),
-          _statRow(
-              '평균 홀수 비율', '${(a.avgOddRatio * 100).toStringAsFixed(1)}%'),
+          _statRow('평균 홀수 비율', '${(a.avgOddRatio * 100).toStringAsFixed(1)}%'),
           _statRow('평균 번호 합계', a.avgSum.toStringAsFixed(0)),
           _statRow('분석 데이터', '${a.totalDraws}회분'),
           const SizedBox(height: 20),
@@ -319,10 +343,7 @@ class _TreasureAiPageState extends State<TreasureAiPage>
           padding: const EdgeInsets.symmetric(vertical: 3),
           child: Row(
             children: [
-              _GemBall(
-                  number: e.key,
-                  color: const Color(0xFFFFD700),
-                  size: 28),
+              _GemBall(number: e.key, color: const Color(0xFFFFD700), size: 28),
               const SizedBox(width: 8),
               Expanded(
                 child: Stack(
@@ -352,9 +373,10 @@ class _TreasureAiPageState extends State<TreasureAiPage>
               const SizedBox(width: 6),
               SizedBox(
                 width: 35,
-                child: Text('${e.value}회',
-                    style:
-                        const TextStyle(color: Colors.white70, fontSize: 12)),
+                child: Text(
+                  '${e.value}회',
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
               ),
             ],
           ),
@@ -407,9 +429,10 @@ class _TreasureAiPageState extends State<TreasureAiPage>
               const SizedBox(width: 6),
               SizedBox(
                 width: 35,
-                child: Text('${e.value}회',
-                    style:
-                        const TextStyle(color: Colors.white70, fontSize: 12)),
+                child: Text(
+                  '${e.value}회',
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
               ),
             ],
           ),
@@ -425,8 +448,10 @@ class _TreasureAiPageState extends State<TreasureAiPage>
         children: [
           SizedBox(
             width: 50,
-            child: Text(label,
-                style: const TextStyle(color: Colors.white70, fontSize: 11)),
+            child: Text(
+              label,
+              style: const TextStyle(color: Colors.white70, fontSize: 11),
+            ),
           ),
           const SizedBox(width: 6),
           Expanded(
@@ -457,8 +482,10 @@ class _TreasureAiPageState extends State<TreasureAiPage>
           const SizedBox(width: 6),
           SizedBox(
             width: 45,
-            child: Text('${percent.toStringAsFixed(1)}%',
-                style: const TextStyle(color: Colors.white70, fontSize: 12)),
+            child: Text(
+              '${percent.toStringAsFixed(1)}%',
+              style: const TextStyle(color: Colors.white70, fontSize: 12),
+            ),
           ),
         ],
       ),
@@ -466,9 +493,14 @@ class _TreasureAiPageState extends State<TreasureAiPage>
   }
 
   Widget _sectionTitle(String text) {
-    return Text(text,
-        style: const TextStyle(
-            color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800));
+    return Text(
+      text,
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 16,
+        fontWeight: FontWeight.w800,
+      ),
+    );
   }
 
   Widget _statRow(String label, String value) {
@@ -477,13 +509,18 @@ class _TreasureAiPageState extends State<TreasureAiPage>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style: const TextStyle(color: Colors.white70, fontSize: 14)),
-          Text(value,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700)),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ],
       ),
     );
@@ -495,11 +532,7 @@ class _GemBall extends StatelessWidget {
   final Color color;
   final double size;
 
-  const _GemBall({
-    required this.number,
-    required this.color,
-    this.size = 38,
-  });
+  const _GemBall({required this.number, required this.color, this.size = 38});
 
   @override
   Widget build(BuildContext context) {
@@ -534,9 +567,10 @@ class _GemBall extends StatelessWidget {
             fontWeight: FontWeight.w900,
             shadows: const [
               Shadow(
-                  color: Color(0x55000000),
-                  offset: Offset(0, 1),
-                  blurRadius: 2),
+                color: Color(0x55000000),
+                offset: Offset(0, 1),
+                blurRadius: 2,
+              ),
             ],
           ),
         ),

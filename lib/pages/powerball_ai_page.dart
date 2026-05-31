@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/powerball_data_service.dart';
 import '../services/powerball_analyzer.dart';
+import '../widgets/ai_boost_badge.dart';
 
 class PowerballAiPage extends StatefulWidget {
   const PowerballAiPage({super.key});
@@ -77,27 +78,28 @@ class _PowerballAiPageState extends State<PowerballAiPage>
                 children: [
                   CircularProgressIndicator(color: Color(0xFFFF4757)),
                   SizedBox(height: 16),
-                  Text('파워볼 데이터 로딩 중...',
-                      style: TextStyle(color: Colors.white70)),
+                  Text(
+                    '파워볼 데이터 로딩 중...',
+                    style: TextStyle(color: Colors.white70),
+                  ),
                 ],
               ),
             )
           : _error != null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Text(_error!,
-                        style: const TextStyle(color: Colors.redAccent),
-                        textAlign: TextAlign.center),
-                  ),
-                )
-              : TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildRecommendationTab(),
-                    _buildStatsTab(),
-                  ],
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Text(
+                  _error!,
+                  style: const TextStyle(color: Colors.redAccent),
+                  textAlign: TextAlign.center,
                 ),
+              ),
+            )
+          : TabBarView(
+              controller: _tabController,
+              children: [_buildRecommendationTab(), _buildStatsTab()],
+            ),
     );
   }
 
@@ -112,9 +114,11 @@ class _PowerballAiPageState extends State<PowerballAiPage>
           _sectionTitle('추천 번호 (5세트)'),
           const SizedBox(height: 4),
           Text(
-            '과거 ${a.totalDraws}회 데이터 기반 분석',
+            '과거 ${a.totalDraws}회 데이터 기반 후보 점수화 · 당첨 보장 아님',
             style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 13,
+            ),
           ),
           const SizedBox(height: 16),
           ...a.recommendations.map((rec) => _buildRecCard(rec)),
@@ -130,10 +134,13 @@ class _PowerballAiPageState extends State<PowerballAiPage>
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFF4757),
                 foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 14,
+                ),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30)),
+                  borderRadius: BorderRadius.circular(30),
+                ),
                 textStyle: const TextStyle(fontWeight: FontWeight.w800),
               ),
             ),
@@ -161,20 +168,29 @@ class _PowerballAiPageState extends State<PowerballAiPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFF4757).withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              '${rec.icon} ${rec.strategy}',
-              style: const TextStyle(
-                color: Color(0xFFFF6B81),
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF4757).withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${rec.icon} ${rec.strategy}',
+                  style: const TextStyle(
+                    color: Color(0xFFFF6B81),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(width: 8),
+              const AiBoostBadge(),
+            ],
           ),
           const SizedBox(height: 14),
           FittedBox(
@@ -182,18 +198,22 @@ class _PowerballAiPageState extends State<PowerballAiPage>
             alignment: Alignment.centerLeft,
             child: Row(
               children: [
-                ...rec.numbers.map((n) => Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 3),
-                      child: _NumberBall(number: n),
-                    )),
+                ...rec.numbers.map(
+                  (n) => Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 3),
+                    child: _NumberBall(number: n),
+                  ),
+                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 6),
-                  child: Text('+',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.5),
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                      )),
+                  child: Text(
+                    '+',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.5),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
                 _PowerBall(number: rec.powerball),
               ],
@@ -303,9 +323,10 @@ class _PowerballAiPageState extends State<PowerballAiPage>
               const SizedBox(width: 8),
               SizedBox(
                 width: 35,
-                child: Text('${e.value}회',
-                    style:
-                        const TextStyle(color: Colors.white70, fontSize: 12)),
+                child: Text(
+                  '${e.value}회',
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
               ),
             ],
           ),
@@ -356,9 +377,10 @@ class _PowerballAiPageState extends State<PowerballAiPage>
               const SizedBox(width: 8),
               SizedBox(
                 width: 35,
-                child: Text('${e.value}회',
-                    style:
-                        const TextStyle(color: Colors.white70, fontSize: 12)),
+                child: Text(
+                  '${e.value}회',
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
               ),
             ],
           ),
@@ -374,8 +396,10 @@ class _PowerballAiPageState extends State<PowerballAiPage>
         children: [
           SizedBox(
             width: 50,
-            child: Text(label,
-                style: const TextStyle(color: Colors.white70, fontSize: 12)),
+            child: Text(
+              label,
+              style: const TextStyle(color: Colors.white70, fontSize: 12),
+            ),
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -406,8 +430,10 @@ class _PowerballAiPageState extends State<PowerballAiPage>
           const SizedBox(width: 8),
           SizedBox(
             width: 45,
-            child: Text('${percent.toStringAsFixed(1)}%',
-                style: const TextStyle(color: Colors.white70, fontSize: 12)),
+            child: Text(
+              '${percent.toStringAsFixed(1)}%',
+              style: const TextStyle(color: Colors.white70, fontSize: 12),
+            ),
           ),
         ],
       ),
@@ -418,7 +444,10 @@ class _PowerballAiPageState extends State<PowerballAiPage>
     return Text(
       text,
       style: const TextStyle(
-          color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800),
+        color: Colors.white,
+        fontSize: 16,
+        fontWeight: FontWeight.w800,
+      ),
     );
   }
 
@@ -428,13 +457,18 @@ class _PowerballAiPageState extends State<PowerballAiPage>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style: const TextStyle(color: Colors.white70, fontSize: 14)),
-          Text(value,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700)),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ],
       ),
     );
@@ -484,9 +518,10 @@ class _NumberBall extends StatelessWidget {
             fontWeight: FontWeight.w900,
             shadows: const [
               Shadow(
-                  color: Color(0x55000000),
-                  offset: Offset(0, 1),
-                  blurRadius: 2),
+                color: Color(0x55000000),
+                offset: Offset(0, 1),
+                blurRadius: 2,
+              ),
             ],
           ),
         ),
@@ -536,9 +571,10 @@ class _PowerBall extends StatelessWidget {
             fontWeight: FontWeight.w900,
             shadows: const [
               Shadow(
-                  color: Color(0x55000000),
-                  offset: Offset(0, 1),
-                  blurRadius: 2),
+                color: Color(0x55000000),
+                offset: Offset(0, 1),
+                blurRadius: 2,
+              ),
             ],
           ),
         ),

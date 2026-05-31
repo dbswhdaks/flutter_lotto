@@ -1,5 +1,6 @@
 import 'dart:math';
 import '../models/speedkino_draw.dart';
+import '../utils/recommendation_scoring.dart';
 
 class SpeedkinoAnalysisResult {
   final Map<int, int> frequency;
@@ -50,7 +51,14 @@ class SpeedkinoAnalyzer {
     final range = _getRangeDistribution();
     final oddRatio = _getAvgOddRatio();
     final avgSum = _getAvgSum();
-    final recs = _generateRecommendations(freq, hot, cold, overdue);
+    final recs = _generateRecommendations(
+      freq,
+      hot,
+      cold,
+      overdue,
+      avgSum,
+      oddRatio,
+    );
 
     return SpeedkinoAnalysisResult(
       frequency: freq,
@@ -119,8 +127,13 @@ class SpeedkinoAnalyzer {
   Map<String, double> _getRangeDistribution() {
     if (draws.isEmpty) return {};
     final ranges = {
-      '1-10': 0, '11-20': 0, '21-30': 0, '31-40': 0,
-      '41-50': 0, '51-60': 0, '61-70': 0,
+      '1-10': 0,
+      '11-20': 0,
+      '21-30': 0,
+      '31-40': 0,
+      '41-50': 0,
+      '51-60': 0,
+      '61-70': 0,
     };
     int total = 0;
     for (final d in draws) {
@@ -156,19 +169,42 @@ class SpeedkinoAnalyzer {
     List<int> hot,
     List<int> cold,
     List<int> overdue,
+    double avgSum,
+    double avgOddRatio,
   ) {
     final rng = Random();
+    SpeedkinoRecommendation improve(SpeedkinoRecommendation Function() picker) {
+      return RecommendationScoring.bestCandidate(
+        rng: rng,
+        picker: picker,
+        score: (rec) => RecommendationScoring.scoreNumbers(
+          rec.numbers,
+          frequency: freq,
+          minNumber: 1,
+          maxNumber: 70,
+          targetCount: 10,
+          targetSum: avgSum,
+          targetOddRatio: avgOddRatio,
+          preferredNumbers: hot.toSet(),
+          secondaryPreferredNumbers: overdue.toSet(),
+        ),
+      );
+    }
+
     return [
-      _hotStrategy(hot, freq, rng),
-      _coldStrategy(cold, freq, rng),
-      _mixedStrategy(hot, overdue, freq, rng),
-      _rangeBalancedStrategy(freq, rng),
-      _weightedRandomStrategy(freq, rng),
+      improve(() => _hotStrategy(hot, freq, rng)),
+      improve(() => _coldStrategy(cold, freq, rng)),
+      improve(() => _mixedStrategy(hot, overdue, freq, rng)),
+      improve(() => _rangeBalancedStrategy(freq, rng)),
+      improve(() => _weightedRandomStrategy(freq, rng)),
     ];
   }
 
   SpeedkinoRecommendation _hotStrategy(
-      List<int> hot, Map<int, int> freq, Random rng) {
+    List<int> hot,
+    Map<int, int> freq,
+    Random rng,
+  ) {
     final pool = List<int>.from(hot);
     while (pool.length < 20) {
       final n = rng.nextInt(70) + 1;
@@ -183,7 +219,10 @@ class SpeedkinoAnalyzer {
   }
 
   SpeedkinoRecommendation _coldStrategy(
-      List<int> cold, Map<int, int> freq, Random rng) {
+    List<int> cold,
+    Map<int, int> freq,
+    Random rng,
+  ) {
     final picked = <int>{};
     final coldList = List<int>.from(cold)..shuffle(rng);
     for (final n in coldList.take(4)) {
@@ -203,7 +242,11 @@ class SpeedkinoAnalyzer {
   }
 
   SpeedkinoRecommendation _mixedStrategy(
-      List<int> hot, List<int> overdue, Map<int, int> freq, Random rng) {
+    List<int> hot,
+    List<int> overdue,
+    Map<int, int> freq,
+    Random rng,
+  ) {
     final picked = <int>{};
     final hotS = List<int>.from(hot)..shuffle(rng);
     final overdueS = List<int>.from(overdue)..shuffle(rng);
@@ -226,9 +269,13 @@ class SpeedkinoAnalyzer {
   }
 
   SpeedkinoRecommendation _rangeBalancedStrategy(
-      Map<int, int> freq, Random rng) {
+    Map<int, int> freq,
+    Random rng,
+  ) {
     final ranges = List.generate(
-        7, (i) => List.generate(10, (j) => i * 10 + j + 1));
+      7,
+      (i) => List.generate(10, (j) => i * 10 + j + 1),
+    );
     final picked = <int>{};
     for (final range in ranges) {
       range.shuffle(rng);
@@ -246,7 +293,9 @@ class SpeedkinoAnalyzer {
   }
 
   SpeedkinoRecommendation _weightedRandomStrategy(
-      Map<int, int> freq, Random rng) {
+    Map<int, int> freq,
+    Random rng,
+  ) {
     final maxF = freq.values.reduce(max).toDouble();
     final picked = <int>{};
     int attempts = 0;

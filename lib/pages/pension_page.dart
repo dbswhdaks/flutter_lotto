@@ -143,11 +143,7 @@ class _PensionPageState extends State<PensionPage>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF1A1A2E),
-              Color(0xFF16213E),
-              Color(0xFF0F3460),
-            ],
+            colors: [Color(0xFF1A1A2E), Color(0xFF16213E), Color(0xFF0F3460)],
           ),
         ),
         child: SafeArea(
@@ -201,11 +197,13 @@ class _PensionPageState extends State<PensionPage>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white.withValues(alpha: 0.1),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.2),
-                ),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
               ),
-              child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ),
           const Expanded(
@@ -270,11 +268,7 @@ class _PensionPageState extends State<PensionPage>
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF2A1B3D),
-                Color(0xFF1E1233),
-                Color(0xFF16102B),
-              ],
+              colors: [Color(0xFF2A1B3D), Color(0xFF1E1233), Color(0xFF16102B)],
             ),
             border: Border.all(
               color: Color.lerp(
@@ -286,8 +280,9 @@ class _PensionPageState extends State<PensionPage>
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFFFD700)
-                    .withValues(alpha: 0.1 + glowIntensity * 0.15),
+                color: const Color(
+                  0xFFFFD700,
+                ).withValues(alpha: 0.1 + glowIntensity * 0.15),
                 blurRadius: 20 + glowIntensity * 15,
                 spreadRadius: -2,
               ),
@@ -391,9 +386,7 @@ class _PensionPageState extends State<PensionPage>
               Colors.white.withValues(alpha: 0.02),
             ],
           ),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.1),
-          ),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
         ),
         child: Center(
           child: Text(
@@ -432,8 +425,7 @@ class _PensionPageState extends State<PensionPage>
                 ? null
                 : () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
-                          builder: (_) => const PensionAiPage()),
+                      MaterialPageRoute(builder: (_) => const PensionAiPage()),
                     );
                   },
           ),
@@ -490,9 +482,7 @@ class _PensionPageState extends State<PensionPage>
 
   Widget _buildConfettiOverlay() {
     return Positioned.fill(
-      child: IgnorePointer(
-        child: _PensionConfetti(key: ValueKey(_drawCount)),
-      ),
+      child: IgnorePointer(child: _PensionConfetti(key: ValueKey(_drawCount))),
     );
   }
 }
@@ -527,8 +517,9 @@ class _DigitSlot extends StatelessWidget {
       animation: controller,
       builder: (context, _) {
         final progress = controller.value;
-        final bounceScale =
-            revealed ? 1.0 + (1 - progress).clamp(0.0, 1.0) * 0.2 : 1.0;
+        final bounceScale = revealed
+            ? 1.0 + (1 - progress).clamp(0.0, 1.0) * 0.2
+            : 1.0;
 
         return Transform.scale(
           scale: bounceScale,
@@ -598,10 +589,7 @@ class _SlotRevealAnimation extends StatelessWidget {
   final int digit;
   final AnimationController controller;
 
-  const _SlotRevealAnimation({
-    required this.digit,
-    required this.controller,
-  });
+  const _SlotRevealAnimation({required this.digit, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -610,8 +598,7 @@ class _SlotRevealAnimation extends StatelessWidget {
       builder: (context, _) {
         final progress = controller.value;
         final spinCount = (progress * 10).floor();
-        final displayDigit =
-            progress >= 0.8 ? digit : (spinCount + digit) % 10;
+        final displayDigit = progress >= 0.8 ? digit : (spinCount + digit) % 10;
 
         return FittedBox(
           fit: BoxFit.scaleDown,
@@ -643,10 +630,7 @@ class _PensionDrawButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final bool isDrawing;
 
-  const _PensionDrawButton({
-    required this.onPressed,
-    required this.isDrawing,
-  });
+  const _PensionDrawButton({required this.onPressed, required this.isDrawing});
 
   @override
   Widget build(BuildContext context) {
@@ -680,16 +664,18 @@ class _PensionDrawButton extends StatelessWidget {
               children: [
                 Icon(
                   isDrawing ? Icons.hourglass_top : Icons.casino,
-                  color: const Color(0xFF1A1A2E)
-                      .withValues(alpha: enabled ? 1 : 0.5),
+                  color: const Color(
+                    0xFF1A1A2E,
+                  ).withValues(alpha: enabled ? 1 : 0.5),
                   size: 22,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   isDrawing ? '추첨 중...' : '번호 추첨',
                   style: TextStyle(
-                    color: const Color(0xFF1A1A2E)
-                        .withValues(alpha: enabled ? 1 : 0.5),
+                    color: const Color(
+                      0xFF1A1A2E,
+                    ).withValues(alpha: enabled ? 1 : 0.5),
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
                   ),
@@ -743,7 +729,7 @@ class _PensionAiButton extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'AI 번호 생성기',
+                  'AI 확률 강화',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
                     fontSize: 14,
@@ -779,9 +765,7 @@ class _PensionHistoryRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(
-            color: Colors.white.withValues(alpha: 0.05),
-          ),
+          bottom: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
         ),
       ),
       child: FittedBox(
@@ -905,19 +889,19 @@ class _ConfettiParticle {
   final double rotation;
 
   _ConfettiParticle(Random r)
-      : x = r.nextDouble(),
-        speed = 0.3 + r.nextDouble() * 0.7,
-        size = 4 + r.nextDouble() * 6,
-        drift = (r.nextDouble() - 0.5) * 0.3,
-        rotation = r.nextDouble() * pi * 2,
-        color = [
-          const Color(0xFFFFD700),
-          const Color(0xFFFFA500),
-          const Color(0xFFFF6B6B),
-          const Color(0xFF4D96FF),
-          const Color(0xFF6BCB77),
-          const Color(0xFFC084FC),
-        ][r.nextInt(6)];
+    : x = r.nextDouble(),
+      speed = 0.3 + r.nextDouble() * 0.7,
+      size = 4 + r.nextDouble() * 6,
+      drift = (r.nextDouble() - 0.5) * 0.3,
+      rotation = r.nextDouble() * pi * 2,
+      color = [
+        const Color(0xFFFFD700),
+        const Color(0xFFFFA500),
+        const Color(0xFFFF6B6B),
+        const Color(0xFF4D96FF),
+        const Color(0xFF6BCB77),
+        const Color(0xFFC084FC),
+      ][r.nextInt(6)];
 }
 
 class _ConfettiPainter extends CustomPainter {
@@ -930,7 +914,8 @@ class _ConfettiPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     for (final p in particles) {
       final y = -20 + progress * size.height * p.speed * 1.5;
-      final x = p.x * size.width + sin(progress * pi * 3 + p.rotation) * 30 * p.drift;
+      final x =
+          p.x * size.width + sin(progress * pi * 3 + p.rotation) * 30 * p.drift;
       final opacity = (1 - progress).clamp(0.0, 1.0);
 
       final paint = Paint()..color = p.color.withValues(alpha: opacity * 0.8);
@@ -939,7 +924,11 @@ class _ConfettiPainter extends CustomPainter {
       canvas.translate(x, y);
       canvas.rotate(progress * pi * 2 * p.speed + p.rotation);
       canvas.drawRect(
-        Rect.fromCenter(center: Offset.zero, width: p.size, height: p.size * 0.6),
+        Rect.fromCenter(
+          center: Offset.zero,
+          width: p.size,
+          height: p.size * 0.6,
+        ),
         paint,
       );
       canvas.restore();

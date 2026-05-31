@@ -1,5 +1,6 @@
 import 'dart:math';
 import '../models/treasure_draw.dart';
+import '../utils/recommendation_scoring.dart';
 
 class TreasureAnalysisResult {
   final Map<int, int> frequency;
@@ -58,7 +59,16 @@ class TreasureAnalyzer {
     final range = _getRangeDistribution();
     final oddRatio = _getAvgOddRatio();
     final avgSum = _getAvgSum();
-    final recs = _generateRecommendations(freq, treasureFreq, hot, cold, overdue, hotTreasures);
+    final recs = _generateRecommendations(
+      freq,
+      treasureFreq,
+      hot,
+      cold,
+      overdue,
+      hotTreasures,
+      avgSum,
+      oddRatio,
+    );
 
     return TreasureAnalysisResult(
       frequency: freq,
@@ -147,9 +157,7 @@ class TreasureAnalyzer {
 
   Map<String, double> _getRangeDistribution() {
     if (draws.isEmpty) return {};
-    final ranges = {
-      '1-7': 0, '8-14': 0, '15-21': 0, '22-28': 0, '29-35': 0
-    };
+    final ranges = {'1-7': 0, '8-14': 0, '15-21': 0, '22-28': 0, '29-35': 0};
     int total = 0;
     for (final d in draws) {
       for (final n in d.numbers) {
@@ -202,19 +210,71 @@ class TreasureAnalyzer {
     List<int> cold,
     List<int> overdue,
     List<int> hotTreasures,
+    double avgSum,
+    double avgOddRatio,
   ) {
     final rng = Random();
+    TreasureRecommendation improve(TreasureRecommendation Function() picker) {
+      return RecommendationScoring.bestCandidate(
+        rng: rng,
+        picker: picker,
+        score: (rec) => _scoreRecommendation(
+          rec,
+          freq,
+          treasureFreq,
+          hot.toSet(),
+          overdue.toSet(),
+          avgSum,
+          avgOddRatio,
+        ),
+      );
+    }
+
     return [
-      _hotStrategy(hot, freq, hotTreasures, rng),
-      _coldStrategy(cold, freq, hotTreasures, rng),
-      _mixedStrategy(hot, overdue, hotTreasures, rng),
-      _rangeBalancedStrategy(hotTreasures, rng),
-      _weightedRandomStrategy(freq, treasureFreq, rng),
+      improve(() => _hotStrategy(hot, freq, hotTreasures, rng)),
+      improve(() => _coldStrategy(cold, freq, hotTreasures, rng)),
+      improve(() => _mixedStrategy(hot, overdue, hotTreasures, rng)),
+      improve(() => _rangeBalancedStrategy(hotTreasures, rng)),
+      improve(() => _weightedRandomStrategy(freq, treasureFreq, rng)),
     ];
   }
 
+  double _scoreRecommendation(
+    TreasureRecommendation rec,
+    Map<int, int> freq,
+    Map<int, int> treasureFreq,
+    Set<int> hot,
+    Set<int> overdue,
+    double avgSum,
+    double avgOddRatio,
+  ) {
+    final maxTreasure = treasureFreq.values.isEmpty
+        ? 1
+        : treasureFreq.values.reduce(max);
+    final treasureScore =
+        (treasureFreq[rec.treasureNumber] ?? 0) /
+        (maxTreasure == 0 ? 1 : maxTreasure);
+
+    return RecommendationScoring.scoreNumbers(
+          rec.numbers,
+          frequency: freq,
+          minNumber: 1,
+          maxNumber: 35,
+          targetCount: 6,
+          targetSum: avgSum,
+          targetOddRatio: avgOddRatio,
+          preferredNumbers: hot,
+          secondaryPreferredNumbers: overdue,
+        ) +
+        treasureScore * 8;
+  }
+
   TreasureRecommendation _hotStrategy(
-      List<int> hot, Map<int, int> freq, List<int> hotTreasures, Random rng) {
+    List<int> hot,
+    Map<int, int> freq,
+    List<int> hotTreasures,
+    Random rng,
+  ) {
     final pool = <int>{...hot};
     final sorted = freq.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
@@ -232,7 +292,11 @@ class TreasureAnalyzer {
   }
 
   TreasureRecommendation _coldStrategy(
-      List<int> cold, Map<int, int> freq, List<int> hotTreasures, Random rng) {
+    List<int> cold,
+    Map<int, int> freq,
+    List<int> hotTreasures,
+    Random rng,
+  ) {
     final picked = <int>{};
     final coldList = List<int>.from(cold)..shuffle(rng);
     for (final n in coldList.take(2)) {
@@ -253,7 +317,11 @@ class TreasureAnalyzer {
   }
 
   TreasureRecommendation _mixedStrategy(
-      List<int> hot, List<int> overdue, List<int> hotTreasures, Random rng) {
+    List<int> hot,
+    List<int> overdue,
+    List<int> hotTreasures,
+    Random rng,
+  ) {
     final picked = <int>{};
     final hotS = List<int>.from(hot)..shuffle(rng);
     final overdueS = List<int>.from(overdue)..shuffle(rng);
@@ -277,7 +345,9 @@ class TreasureAnalyzer {
   }
 
   TreasureRecommendation _rangeBalancedStrategy(
-      List<int> hotTreasures, Random rng) {
+    List<int> hotTreasures,
+    Random rng,
+  ) {
     final ranges = [
       List.generate(7, (i) => i + 1),
       List.generate(7, (i) => i + 8),
@@ -304,7 +374,10 @@ class TreasureAnalyzer {
   }
 
   TreasureRecommendation _weightedRandomStrategy(
-      Map<int, int> freq, Map<int, int> treasureFreq, Random rng) {
+    Map<int, int> freq,
+    Map<int, int> treasureFreq,
+    Random rng,
+  ) {
     final maxF = freq.values.reduce(max).toDouble();
     final picked = <int>{};
     int attempts = 0;

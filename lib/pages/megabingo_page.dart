@@ -133,11 +133,7 @@ class _MegabingoPageState extends State<MegabingoPage>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF1A1A2E),
-              Color(0xFF16213E),
-              Color(0xFF0F3460),
-            ],
+            colors: [Color(0xFF1A1A2E), Color(0xFF16213E), Color(0xFF0F3460)],
           ),
         ),
         child: SafeArea(
@@ -147,8 +143,9 @@ class _MegabingoPageState extends State<MegabingoPage>
                 builder: (context, constraints) {
                   return SingleChildScrollView(
                     child: ConstrainedBox(
-                      constraints:
-                          BoxConstraints(minHeight: constraints.maxHeight),
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
+                      ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -192,11 +189,13 @@ class _MegabingoPageState extends State<MegabingoPage>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white.withValues(alpha: 0.1),
-                border:
-                    Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
               ),
-              child:
-                  const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ),
           const Expanded(
@@ -232,10 +231,15 @@ class _MegabingoPageState extends State<MegabingoPage>
                 shape: BoxShape.circle,
                 color: Colors.black.withValues(alpha: 0.3),
                 border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.2), width: 1.5),
+                  color: Colors.white.withValues(alpha: 0.2),
+                  width: 1.5,
+                ),
               ),
-              child: Icon(Icons.refresh,
-                  color: Colors.white.withValues(alpha: 0.9), size: 22),
+              child: Icon(
+                Icons.refresh,
+                color: Colors.white.withValues(alpha: 0.9),
+                size: 22,
+              ),
             ),
           ),
         ],
@@ -263,11 +267,7 @@ class _MegabingoPageState extends State<MegabingoPage>
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF2D1B4E),
-                Color(0xFF1E1040),
-                Color(0xFF180D35),
-              ],
+              colors: [Color(0xFF2D1B4E), Color(0xFF1E1040), Color(0xFF180D35)],
             ),
             border: Border.all(
               color: Color.lerp(
@@ -279,8 +279,9 @@ class _MegabingoPageState extends State<MegabingoPage>
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFDA70D6)
-                    .withValues(alpha: 0.08 + glow * 0.12),
+                color: const Color(
+                  0xFFDA70D6,
+                ).withValues(alpha: 0.08 + glow * 0.12),
                 blurRadius: 20 + glow * 12,
                 spreadRadius: -2,
               ),
@@ -313,23 +314,23 @@ class _MegabingoPageState extends State<MegabingoPage>
   }
 
   Widget _buildBingoCell(int index, bool isOnBingoLine) {
-    final hasCard = _currentResult != null && index < _currentResult!.cardNumbers.length;
+    final hasCard =
+        _currentResult != null && index < _currentResult!.cardNumbers.length;
     final number = hasCard ? _currentResult!.cardNumbers[index] : null;
     final isMatched = number != null && _revealedDrawn.contains(number);
 
     return AnimatedBuilder(
       animation: _bingoFlashController,
       builder: (context, _) {
-        final flashVal =
-            isOnBingoLine ? _bingoFlashController.value : 0.0;
+        final flashVal = isOnBingoLine ? _bingoFlashController.value : 0.0;
         final baseColor = isMatched
             ? (isOnBingoLine
-                ? Color.lerp(
-                    const Color(0xFFDA70D6),
-                    const Color(0xFFFF6B9D),
-                    flashVal,
-                  )!
-                : const Color(0xFF8E44AD))
+                  ? Color.lerp(
+                      const Color(0xFFDA70D6),
+                      const Color(0xFFFF6B9D),
+                      flashVal,
+                    )!
+                  : const Color(0xFF8E44AD))
             : Colors.white.withValues(alpha: 0.06);
 
         return AspectRatio(
@@ -352,8 +353,9 @@ class _MegabingoPageState extends State<MegabingoPage>
               color: isMatched ? null : baseColor,
               border: isOnBingoLine
                   ? Border.all(
-                      color: const Color(0xFFFFD700)
-                          .withValues(alpha: 0.5 + flashVal * 0.5),
+                      color: const Color(
+                        0xFFFFD700,
+                      ).withValues(alpha: 0.5 + flashVal * 0.5),
                       width: 2,
                     )
                   : null,
@@ -425,8 +427,11 @@ class _MegabingoPageState extends State<MegabingoPage>
         children: [
           Row(
             children: [
-              Icon(Icons.casino,
-                  color: Colors.white.withValues(alpha: 0.5), size: 14),
+              Icon(
+                Icons.casino,
+                color: Colors.white.withValues(alpha: 0.5),
+                size: 14,
+              ),
               const SizedBox(width: 6),
               Text(
                 '추첨 번호 ($_revealIndex/20)',
@@ -526,10 +531,7 @@ class _MegabingoPageState extends State<MegabingoPage>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            count > 0 ? '🎉' : '📋',
-            style: const TextStyle(fontSize: 18),
-          ),
+          Text(count > 0 ? '🎉' : '📋', style: const TextStyle(fontSize: 18)),
           const SizedBox(width: 10),
           Column(
             children: [
@@ -580,7 +582,8 @@ class _MegabingoPageState extends State<MegabingoPage>
                 : () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                          builder: (_) => const MegabingoAiPage()),
+                        builder: (_) => const MegabingoAiPage(),
+                      ),
                     );
                   },
           ),
@@ -603,8 +606,11 @@ class _MegabingoPageState extends State<MegabingoPage>
             padding: const EdgeInsets.only(left: 4, bottom: 8),
             child: Row(
               children: [
-                Icon(Icons.history,
-                    color: Colors.white.withValues(alpha: 0.5), size: 16),
+                Icon(
+                  Icons.history,
+                  color: Colors.white.withValues(alpha: 0.5),
+                  size: 16,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   '추첨 이력',
@@ -628,7 +634,8 @@ class _MegabingoPageState extends State<MegabingoPage>
                   decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.05)),
+                        color: Colors.white.withValues(alpha: 0.05),
+                      ),
                     ),
                   ),
                   child: Row(
@@ -654,7 +661,9 @@ class _MegabingoPageState extends State<MegabingoPage>
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 2),
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
                           color: r.bingoCount > 0
@@ -662,9 +671,7 @@ class _MegabingoPageState extends State<MegabingoPage>
                               : Colors.white.withValues(alpha: 0.06),
                         ),
                         child: Text(
-                          r.bingoCount > 0
-                              ? '빙고 ${r.bingoCount}줄'
-                              : '빙고 없음',
+                          r.bingoCount > 0 ? '빙고 ${r.bingoCount}줄' : '빙고 없음',
                           style: TextStyle(
                             color: r.bingoCount > 0
                                 ? const Color(0xFFDA70D6)
@@ -687,9 +694,7 @@ class _MegabingoPageState extends State<MegabingoPage>
 
   Widget _buildConfettiOverlay() {
     return Positioned.fill(
-      child: IgnorePointer(
-        child: _BingoConfetti(key: ValueKey(_drawCount)),
-      ),
+      child: IgnorePointer(child: _BingoConfetti(key: ValueKey(_drawCount))),
     );
   }
 }
@@ -784,12 +789,14 @@ class _AiButton extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.auto_awesome,
-                    color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
-                    size: 18),
+                Icon(
+                  Icons.auto_awesome,
+                  color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
+                  size: 18,
+                ),
                 const SizedBox(width: 8),
                 Text(
-                  'AI 번호 생성기',
+                  'AI 확률 강화',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
                     fontSize: 14,
@@ -843,7 +850,9 @@ class _BingoConfettiState extends State<_BingoConfetti>
       builder: (context, _) {
         return CustomPaint(
           painter: _ConfettiPainter(
-              particles: _particles, progress: _controller.value),
+            particles: _particles,
+            progress: _controller.value,
+          ),
           size: Size.infinite,
         );
       },
@@ -856,19 +865,19 @@ class _Particle {
   final Color color;
 
   _Particle(Random r)
-      : x = r.nextDouble(),
-        speed = 0.3 + r.nextDouble() * 0.7,
-        size = 4 + r.nextDouble() * 7,
-        drift = (r.nextDouble() - 0.5) * 0.3,
-        rotation = r.nextDouble() * pi * 2,
-        color = [
-          const Color(0xFFDA70D6),
-          const Color(0xFF8E44AD),
-          const Color(0xFFFFD700),
-          const Color(0xFF4D96FF),
-          const Color(0xFFFF6B6B),
-          const Color(0xFF2ECC71),
-        ][r.nextInt(6)];
+    : x = r.nextDouble(),
+      speed = 0.3 + r.nextDouble() * 0.7,
+      size = 4 + r.nextDouble() * 7,
+      drift = (r.nextDouble() - 0.5) * 0.3,
+      rotation = r.nextDouble() * pi * 2,
+      color = [
+        const Color(0xFFDA70D6),
+        const Color(0xFF8E44AD),
+        const Color(0xFFFFD700),
+        const Color(0xFF4D96FF),
+        const Color(0xFFFF6B6B),
+        const Color(0xFF2ECC71),
+      ][r.nextInt(6)];
 }
 
 class _ConfettiPainter extends CustomPainter {
@@ -881,8 +890,8 @@ class _ConfettiPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     for (final p in particles) {
       final y = -20 + progress * size.height * p.speed * 1.5;
-      final x = p.x * size.width +
-          sin(progress * pi * 3 + p.rotation) * 30 * p.drift;
+      final x =
+          p.x * size.width + sin(progress * pi * 3 + p.rotation) * 30 * p.drift;
       final opacity = (1 - progress).clamp(0.0, 1.0);
       final paint = Paint()..color = p.color.withValues(alpha: opacity * 0.8);
       canvas.save();
@@ -891,7 +900,10 @@ class _ConfettiPainter extends CustomPainter {
       canvas.drawRRect(
         RRect.fromRectAndRadius(
           Rect.fromCenter(
-              center: Offset.zero, width: p.size, height: p.size * 0.6),
+            center: Offset.zero,
+            width: p.size,
+            height: p.size * 0.6,
+          ),
           const Radius.circular(2),
         ),
         paint,

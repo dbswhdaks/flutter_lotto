@@ -129,19 +129,28 @@ class LottoAnalyzer {
     final consecutive = _getConsecutivePairCount();
     final trend = _getRecentTrend();
 
-    final latestRound = overrideLatestRound
-        ?? (draws.isNotEmpty ? draws.first.round : 0);
+    final latestRound =
+        overrideLatestRound ?? (draws.isNotEmpty ? draws.first.round : 0);
 
     final recommendations = <RoundRecommendation>[];
     for (int i = 0; i < recommendCount; i++) {
       final round = latestRound + 1 + i;
-      recommendations.add(RoundRecommendation(
-        round: round,
-        sets: _generateRoundSets(
-          freq, hot, cold, overdueResult['numbers'] as List<int>,
-          overdueResult['gap'] as Map<int, int>, pairs, round,
+      recommendations.add(
+        RoundRecommendation(
+          round: round,
+          sets: _generateRoundSets(
+            freq,
+            hot,
+            cold,
+            overdueResult['numbers'] as List<int>,
+            overdueResult['gap'] as Map<int, int>,
+            pairs,
+            avgSum,
+            oddEven,
+            round,
+          ),
         ),
-      ));
+      );
     }
 
     return FullAnalysisResult(
@@ -376,54 +385,192 @@ class LottoAnalyzer {
     List<int> overdue,
     Map<int, int> overdueGap,
     List<MapEntry<String, int>> topPairs,
+    double avgSum,
+    double avgOddEvenRatio,
     int targetRound,
   ) {
-    final rng = Random(targetRound * 31 + DateTime.now().millisecondsSinceEpoch);
+    final rng = Random(
+      targetRound * 31 + DateTime.now().millisecondsSinceEpoch,
+    );
     final sets = <RecommendationSet>[];
+    List<int> improve(List<int> Function() picker) => _bestCandidate(
+      rng: rng,
+      picker: picker,
+      freq: freq,
+      overdueGap: overdueGap,
+      topPairs: topPairs,
+      avgSum: avgSum,
+      avgOddEvenRatio: avgOddEvenRatio,
+    );
 
-    sets.add(RecommendationSet(
-      strategy: '핫번호 집중',
-      emoji: '🔥',
-      numbers: _pickBalanced(hot, freq, rng),
-      reason: '최근 50회 자주 출현한 번호 위주',
-    ));
+    sets.add(
+      RecommendationSet(
+        strategy: '핫번호 집중',
+        emoji: '🔥',
+        numbers: improve(() => _pickBalanced(hot, freq, rng)),
+        reason: '최근 50회 자주 출현한 번호를 후보화한 뒤 균형 점수로 선별',
+      ),
+    );
 
-    sets.add(RecommendationSet(
-      strategy: '콜드번호 반등',
-      emoji: '❄️',
-      numbers: _pickWithCold(cold, freq, rng),
-      reason: '장기 미출현 번호의 반등 기대',
-    ));
+    sets.add(
+      RecommendationSet(
+        strategy: '콜드번호 반등',
+        emoji: '❄️',
+        numbers: improve(() => _pickWithCold(cold, freq, rng)),
+        reason: '최근 미출현 번호를 포함하되 합계·홀짝·구간 균형을 보정',
+      ),
+    );
 
-    sets.add(RecommendationSet(
-      strategy: '핫+콜드 혼합',
-      emoji: '🔄',
-      numbers: _pickMixed(hot, overdue, freq, rng),
-      reason: '핫번호와 장기미출현 번호를 균형 배합',
-    ));
+    sets.add(
+      RecommendationSet(
+        strategy: '핫+콜드 혼합',
+        emoji: '🔄',
+        numbers: improve(() => _pickMixed(hot, overdue, freq, rng)),
+        reason: '핫번호와 장기미출현 번호를 섞고 극단 조합을 제외',
+      ),
+    );
 
-    sets.add(RecommendationSet(
-      strategy: '구간 균형',
-      emoji: '⚖️',
-      numbers: _pickRangeBalanced(freq, rng),
-      reason: '1~45를 5구간으로 나누어 균등 배분',
-    ));
+    sets.add(
+      RecommendationSet(
+        strategy: '구간 균형',
+        emoji: '⚖️',
+        numbers: improve(() => _pickRangeBalanced(freq, rng)),
+        reason: '1~45를 5구간으로 나누고 끝자리 쏠림을 줄인 조합',
+      ),
+    );
 
-    sets.add(RecommendationSet(
-      strategy: '빈도 가중 랜덤',
-      emoji: '🎲',
-      numbers: _pickWeightedRandom(freq, rng),
-      reason: '역대 출현빈도에 비례한 확률 추첨',
-    ));
+    sets.add(
+      RecommendationSet(
+        strategy: '빈도 가중 랜덤',
+        emoji: '🎲',
+        numbers: improve(() => _pickWeightedRandom(freq, rng)),
+        reason: '역대 출현빈도를 반영한 후보 중 통계 점수가 높은 조합',
+      ),
+    );
 
-    sets.add(RecommendationSet(
-      strategy: '동반출현 기반',
-      emoji: '🤝',
-      numbers: _pickFromPairs(topPairs, freq, rng),
-      reason: '자주 함께 나오는 번호 조합 활용',
-    ));
+    sets.add(
+      RecommendationSet(
+        strategy: '동반출현 기반',
+        emoji: '🤝',
+        numbers: improve(() => _pickFromPairs(topPairs, freq, rng)),
+        reason: '자주 함께 나온 번호쌍을 활용하고 전체 균형을 재검증',
+      ),
+    );
 
     return sets;
+  }
+
+  List<int> _bestCandidate({
+    required Random rng,
+    required List<int> Function() picker,
+    required Map<int, int> freq,
+    required Map<int, int> overdueGap,
+    required List<MapEntry<String, int>> topPairs,
+    required double avgSum,
+    required double avgOddEvenRatio,
+  }) {
+    List<int>? best;
+    double bestScore = double.negativeInfinity;
+
+    for (int i = 0; i < 80; i++) {
+      final candidate = picker()..sort();
+      final score = _scoreCandidate(
+        candidate,
+        freq: freq,
+        overdueGap: overdueGap,
+        topPairs: topPairs,
+        avgSum: avgSum,
+        avgOddEvenRatio: avgOddEvenRatio,
+      );
+      if (score > bestScore || (score == bestScore && rng.nextBool())) {
+        best = candidate;
+        bestScore = score;
+      }
+    }
+
+    return best ?? (picker()..sort());
+  }
+
+  double _scoreCandidate(
+    List<int> numbers, {
+    required Map<int, int> freq,
+    required Map<int, int> overdueGap,
+    required List<MapEntry<String, int>> topPairs,
+    required double avgSum,
+    required double avgOddEvenRatio,
+  }) {
+    final sum = numbers.reduce((a, b) => a + b);
+    final oddCount = numbers.where((n) => n.isOdd).length;
+    final targetOddCount = (avgOddEvenRatio * 6).clamp(2, 4);
+    final ranges = _rangeCounts(numbers);
+    final endDigits = <int, int>{};
+    for (final n in numbers) {
+      endDigits[n % 10] = (endDigits[n % 10] ?? 0) + 1;
+    }
+
+    final maxFrequency = freq.values.isEmpty ? 1 : freq.values.reduce(max);
+    final frequencyScore =
+        numbers
+            .map((n) => (freq[n] ?? 0) / (maxFrequency == 0 ? 1 : maxFrequency))
+            .reduce((a, b) => a + b) /
+        numbers.length;
+    final overdueScore =
+        numbers
+            .map((n) => (overdueGap[n] ?? 0).clamp(0, 30) / 30)
+            .reduce((a, b) => a + b) /
+        numbers.length;
+
+    final topPairSet = topPairs.map((e) => e.key).toSet();
+    int pairHits = 0;
+    for (int i = 0; i < numbers.length; i++) {
+      for (int j = i + 1; j < numbers.length; j++) {
+        if (topPairSet.contains('${numbers[i]}-${numbers[j]}')) pairHits++;
+      }
+    }
+
+    final consecutivePairs = _countConsecutivePairs(numbers);
+    final rangePenalty =
+        ranges.values.where((count) => count == 0).length * 3.0 +
+        ranges.values.where((count) => count > 2).length * 4.0;
+    final endDigitPenalty = endDigits.values
+        .where((count) => count > 2)
+        .fold<double>(0, (sum, count) => sum + (count - 2) * 4);
+
+    return 100 -
+        (sum - avgSum).abs() * 0.35 -
+        (oddCount - targetOddCount).abs() * 5 -
+        rangePenalty -
+        max(0, consecutivePairs - 1) * 6 -
+        endDigitPenalty +
+        frequencyScore * 12 +
+        overdueScore * 4 +
+        min(pairHits, 3) * 2.5;
+  }
+
+  Map<String, int> _rangeCounts(List<int> numbers) {
+    final counts = {'1-10': 0, '11-20': 0, '21-30': 0, '31-40': 0, '41-45': 0};
+    for (final n in numbers) {
+      if (n <= 10) {
+        counts['1-10'] = counts['1-10']! + 1;
+      } else if (n <= 20) {
+        counts['11-20'] = counts['11-20']! + 1;
+      } else if (n <= 30) {
+        counts['21-30'] = counts['21-30']! + 1;
+      } else if (n <= 40) {
+        counts['31-40'] = counts['31-40']! + 1;
+      } else {
+        counts['41-45'] = counts['41-45']! + 1;
+      }
+    }
+    return counts;
+  }
+
+  int _countConsecutivePairs(List<int> numbers) {
+    int count = 0;
+    for (int i = 1; i < numbers.length; i++) {
+      if (numbers[i] - numbers[i - 1] == 1) count++;
+    }
+    return count;
   }
 
   List<int> _pickFromPairs(
@@ -432,7 +579,8 @@ class LottoAnalyzer {
     Random rng,
   ) {
     final picked = <int>{};
-    final shuffledPairs = List<MapEntry<String, int>>.from(topPairs)..shuffle(rng);
+    final shuffledPairs = List<MapEntry<String, int>>.from(topPairs)
+      ..shuffle(rng);
 
     for (final pair in shuffledPairs) {
       if (picked.length >= 6) break;
@@ -478,7 +626,11 @@ class LottoAnalyzer {
   }
 
   List<int> _pickMixed(
-      List<int> hot, List<int> overdue, Map<int, int> freq, Random rng) {
+    List<int> hot,
+    List<int> overdue,
+    Map<int, int> freq,
+    Random rng,
+  ) {
     final picked = <int>{};
     final hotShuffled = List<int>.from(hot)..shuffle(rng);
     final overdueShuffled = List<int>.from(overdue)..shuffle(rng);
@@ -578,7 +730,9 @@ class LottoAnalyzer {
     }
     buf.writeln();
 
-    buf.writeln('평균 홀수 비율: ${(result.avgOddEvenRatio * 100).toStringAsFixed(1)}%');
+    buf.writeln(
+      '평균 홀수 비율: ${(result.avgOddEvenRatio * 100).toStringAsFixed(1)}%',
+    );
     buf.writeln('평균 합계: ${result.avgSum.toStringAsFixed(0)}');
     buf.writeln();
 

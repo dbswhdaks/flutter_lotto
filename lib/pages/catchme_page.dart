@@ -70,8 +70,7 @@ class _CatchmePageState extends State<CatchmePage>
       _showConfetti = false;
       _revealed = false;
       _drawCount++;
-      _currentResult =
-          CatchmeResult.generate(_drawCount, _selectedNumber!);
+      _currentResult = CatchmeResult.generate(_drawCount, _selectedNumber!);
     });
 
     _sound.playStart();
@@ -144,11 +143,7 @@ class _CatchmePageState extends State<CatchmePage>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF1A1A2E),
-              Color(0xFF16213E),
-              Color(0xFF0F3460),
-            ],
+            colors: [Color(0xFF1A1A2E), Color(0xFF16213E), Color(0xFF0F3460)],
           ),
         ),
         child: SafeArea(
@@ -158,8 +153,9 @@ class _CatchmePageState extends State<CatchmePage>
                 builder: (context, constraints) {
                   return SingleChildScrollView(
                     child: ConstrainedBox(
-                      constraints:
-                          BoxConstraints(minHeight: constraints.maxHeight),
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
+                      ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -201,11 +197,13 @@ class _CatchmePageState extends State<CatchmePage>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white.withValues(alpha: 0.1),
-                border:
-                    Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
               ),
-              child:
-                  const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ),
           const Expanded(
@@ -241,10 +239,15 @@ class _CatchmePageState extends State<CatchmePage>
                 shape: BoxShape.circle,
                 color: Colors.black.withValues(alpha: 0.3),
                 border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.2), width: 1.5),
+                  color: Colors.white.withValues(alpha: 0.2),
+                  width: 1.5,
+                ),
               ),
-              child: Icon(Icons.refresh,
-                  color: Colors.white.withValues(alpha: 0.9), size: 22),
+              child: Icon(
+                Icons.refresh,
+                color: Colors.white.withValues(alpha: 0.9),
+                size: 22,
+              ),
             ),
           ),
         ],
@@ -266,11 +269,7 @@ class _CatchmePageState extends State<CatchmePage>
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF2A1525),
-                Color(0xFF1E0F1A),
-                Color(0xFF160A14),
-              ],
+              colors: [Color(0xFF2A1525), Color(0xFF1E0F1A), Color(0xFF160A14)],
             ),
             border: Border.all(
               color: Color.lerp(
@@ -282,8 +281,9 @@ class _CatchmePageState extends State<CatchmePage>
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFE91E63)
-                    .withValues(alpha: 0.1 + glow * 0.12),
+                color: const Color(
+                  0xFFE91E63,
+                ).withValues(alpha: 0.1 + glow * 0.12),
                 blurRadius: 20 + glow * 12,
                 spreadRadius: -2,
               ),
@@ -291,11 +291,7 @@ class _CatchmePageState extends State<CatchmePage>
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildMyBall(),
-              _buildVsLabel(),
-              _buildDrawnBall(),
-            ],
+            children: [_buildMyBall(), _buildVsLabel(), _buildDrawnBall()],
           ),
         );
       },
@@ -318,10 +314,16 @@ class _CatchmePageState extends State<CatchmePage>
                     radius: 0.8,
                     colors: [
                       Color.lerp(
-                          _ballColor(_selectedNumber!), Colors.white, 0.35)!,
+                        _ballColor(_selectedNumber!),
+                        Colors.white,
+                        0.35,
+                      )!,
                       _ballColor(_selectedNumber!),
                       Color.lerp(
-                          _ballColor(_selectedNumber!), Colors.black, 0.2)!,
+                        _ballColor(_selectedNumber!),
+                        Colors.black,
+                        0.2,
+                      )!,
                     ],
                   )
                 : null,
@@ -331,8 +333,9 @@ class _CatchmePageState extends State<CatchmePage>
             boxShadow: _selectedNumber != null
                 ? [
                     BoxShadow(
-                      color: _ballColor(_selectedNumber!)
-                          .withValues(alpha: 0.5),
+                      color: _ballColor(
+                        _selectedNumber!,
+                      ).withValues(alpha: 0.5),
                       blurRadius: 12,
                     ),
                   ]
@@ -394,8 +397,7 @@ class _CatchmePageState extends State<CatchmePage>
           animation: _revealController,
           builder: (context, _) {
             final scale = hasDrawn
-                ? 1.0 +
-                    (1 - _revealController.value).clamp(0.0, 1.0) * 0.3
+                ? 1.0 + (1 - _revealController.value).clamp(0.0, 1.0) * 0.3
                 : 1.0;
             return Transform.scale(
               scale: scale,
@@ -416,23 +418,28 @@ class _CatchmePageState extends State<CatchmePage>
                                 ]
                               : [
                                   Color.lerp(
-                                      _ballColor(num!), Colors.white, 0.35)!,
+                                    _ballColor(num!),
+                                    Colors.white,
+                                    0.35,
+                                  )!,
                                   _ballColor(num),
                                   Color.lerp(
-                                      _ballColor(num), Colors.black, 0.2)!,
+                                    _ballColor(num),
+                                    Colors.black,
+                                    0.2,
+                                  )!,
                                 ],
                         )
                       : null,
-                  color: hasDrawn
-                      ? null
-                      : Colors.white.withValues(alpha: 0.06),
+                  color: hasDrawn ? null : Colors.white.withValues(alpha: 0.06),
                   boxShadow: hasDrawn
                       ? [
                           BoxShadow(
-                            color: (isMatch
-                                    ? const Color(0xFFFFD700)
-                                    : _ballColor(num!))
-                                .withValues(alpha: 0.5),
+                            color:
+                                (isMatch
+                                        ? const Color(0xFFFFD700)
+                                        : _ballColor(num!))
+                                    .withValues(alpha: 0.5),
                             blurRadius: 14,
                           ),
                         ]
@@ -563,8 +570,7 @@ class _CatchmePageState extends State<CatchmePage>
                                   style: TextStyle(
                                     color: selected
                                         ? Colors.white
-                                        : Colors.white
-                                            .withValues(alpha: 0.5),
+                                        : Colors.white.withValues(alpha: 0.5),
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -609,8 +615,7 @@ class _CatchmePageState extends State<CatchmePage>
                 ? null
                 : () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
-                          builder: (_) => const CatchmeAiPage()),
+                      MaterialPageRoute(builder: (_) => const CatchmeAiPage()),
                     );
                   },
           ),
@@ -633,8 +638,11 @@ class _CatchmePageState extends State<CatchmePage>
             padding: const EdgeInsets.only(left: 4, bottom: 8),
             child: Row(
               children: [
-                Icon(Icons.history,
-                    color: Colors.white.withValues(alpha: 0.5), size: 16),
+                Icon(
+                  Icons.history,
+                  color: Colors.white.withValues(alpha: 0.5),
+                  size: 16,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   '추첨 이력',
@@ -658,7 +666,8 @@ class _CatchmePageState extends State<CatchmePage>
                   decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.05)),
+                        color: Colors.white.withValues(alpha: 0.05),
+                      ),
                     ),
                   ),
                   child: Row(
@@ -693,12 +702,13 @@ class _CatchmePageState extends State<CatchmePage>
                       const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 2),
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
                           color: r.isMatch
-                              ? const Color(0xFFFFD700)
-                                  .withValues(alpha: 0.2)
+                              ? const Color(0xFFFFD700).withValues(alpha: 0.2)
                               : Colors.white.withValues(alpha: 0.06),
                         ),
                         child: Text(
@@ -737,7 +747,10 @@ class _CatchmePageState extends State<CatchmePage>
         child: Text(
           '$n',
           style: const TextStyle(
-              color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700),
+            color: Colors.white,
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );
@@ -745,9 +758,7 @@ class _CatchmePageState extends State<CatchmePage>
 
   Widget _buildConfettiOverlay() {
     return Positioned.fill(
-      child: IgnorePointer(
-        child: _CatchConfetti(key: ValueKey(_drawCount)),
-      ),
+      child: IgnorePointer(child: _CatchConfetti(key: ValueKey(_drawCount))),
     );
   }
 }
@@ -796,8 +807,8 @@ class _DrawButton extends StatelessWidget {
                   isDrawing
                       ? Icons.hourglass_top
                       : hasSelection
-                          ? Icons.play_arrow
-                          : Icons.touch_app,
+                      ? Icons.play_arrow
+                      : Icons.touch_app,
                   color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
                   size: 22,
                 ),
@@ -806,8 +817,8 @@ class _DrawButton extends StatelessWidget {
                   isDrawing
                       ? '추첨 중...'
                       : hasSelection
-                          ? '캐치!'
-                          : '번호 선택',
+                      ? '캐치!'
+                      : '번호 선택',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
                     fontSize: 16,
@@ -855,12 +866,14 @@ class _AiButton extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.auto_awesome,
-                    color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
-                    size: 18),
+                Icon(
+                  Icons.auto_awesome,
+                  color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
+                  size: 18,
+                ),
                 const SizedBox(width: 8),
                 Text(
-                  'AI 번호 생성기',
+                  'AI 확률 강화',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: enabled ? 1 : 0.5),
                     fontSize: 14,
@@ -914,7 +927,9 @@ class _CatchConfettiState extends State<_CatchConfetti>
       builder: (context, _) {
         return CustomPaint(
           painter: _ConfettiPainter(
-              particles: _particles, progress: _controller.value),
+            particles: _particles,
+            progress: _controller.value,
+          ),
           size: Size.infinite,
         );
       },
@@ -927,19 +942,19 @@ class _Particle {
   final Color color;
 
   _Particle(Random r)
-      : x = r.nextDouble(),
-        speed = 0.3 + r.nextDouble() * 0.7,
-        size = 4 + r.nextDouble() * 7,
-        drift = (r.nextDouble() - 0.5) * 0.3,
-        rotation = r.nextDouble() * pi * 2,
-        color = [
-          const Color(0xFFFF80AB),
-          const Color(0xFFE91E63),
-          const Color(0xFFFFD700),
-          const Color(0xFFF48FB1),
-          const Color(0xFFFF6090),
-          const Color(0xFFFFECB3),
-        ][r.nextInt(6)];
+    : x = r.nextDouble(),
+      speed = 0.3 + r.nextDouble() * 0.7,
+      size = 4 + r.nextDouble() * 7,
+      drift = (r.nextDouble() - 0.5) * 0.3,
+      rotation = r.nextDouble() * pi * 2,
+      color = [
+        const Color(0xFFFF80AB),
+        const Color(0xFFE91E63),
+        const Color(0xFFFFD700),
+        const Color(0xFFF48FB1),
+        const Color(0xFFFF6090),
+        const Color(0xFFFFECB3),
+      ][r.nextInt(6)];
 }
 
 class _ConfettiPainter extends CustomPainter {
@@ -952,8 +967,8 @@ class _ConfettiPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     for (final p in particles) {
       final y = -20 + progress * size.height * p.speed * 1.5;
-      final x = p.x * size.width +
-          sin(progress * pi * 3 + p.rotation) * 30 * p.drift;
+      final x =
+          p.x * size.width + sin(progress * pi * 3 + p.rotation) * 30 * p.drift;
       final opacity = (1 - progress).clamp(0.0, 1.0);
       final paint = Paint()..color = p.color.withValues(alpha: opacity * 0.8);
       canvas.save();
@@ -961,7 +976,10 @@ class _ConfettiPainter extends CustomPainter {
       canvas.rotate(progress * pi * 2 * p.speed + p.rotation);
       canvas.drawRect(
         Rect.fromCenter(
-            center: Offset.zero, width: p.size, height: p.size * 0.6),
+          center: Offset.zero,
+          width: p.size,
+          height: p.size * 0.6,
+        ),
         paint,
       );
       canvas.restore();

@@ -1,5 +1,6 @@
 import 'dart:math';
 import '../models/tripleluck_draw.dart';
+import '../utils/recommendation_scoring.dart';
 
 class TripleluckAnalysisResult {
   final Map<int, int> frequency;
@@ -60,7 +61,16 @@ class TripleluckAnalyzer {
     final range = _getRangeDistribution();
     final oddRatio = _getAvgOddRatio();
     final avgSum = _getAvgSum();
-    final recs = _generateRecommendations(freq, tripleFreq, luckFreq, hot, cold, overdue);
+    final recs = _generateRecommendations(
+      freq,
+      tripleFreq,
+      luckFreq,
+      hot,
+      cold,
+      overdue,
+      avgSum,
+      oddRatio,
+    );
 
     return TripleluckAnalysisResult(
       frequency: freq,
@@ -192,19 +202,80 @@ class TripleluckAnalyzer {
     List<int> hot,
     List<int> cold,
     List<int> overdue,
+    double avgSum,
+    double avgOddRatio,
   ) {
     final rng = Random();
+    TripleluckRecommendation improve(
+      TripleluckRecommendation Function() picker,
+    ) {
+      return RecommendationScoring.bestCandidate(
+        rng: rng,
+        picker: picker,
+        score: (rec) => _scoreRecommendation(
+          rec,
+          freq,
+          tripleFreq,
+          luckFreq,
+          hot.toSet(),
+          overdue.toSet(),
+          avgSum,
+          avgOddRatio,
+        ),
+      );
+    }
+
     return [
-      _hotStrategy(hot, tripleFreq, luckFreq, rng),
-      _coldStrategy(cold, freq, rng),
-      _mixedStrategy(hot, overdue, rng),
-      _positionBiasStrategy(tripleFreq, luckFreq, rng),
-      _weightedRandomStrategy(freq, rng),
+      improve(() => _hotStrategy(hot, tripleFreq, luckFreq, rng)),
+      improve(() => _coldStrategy(cold, freq, rng)),
+      improve(() => _mixedStrategy(hot, overdue, rng)),
+      improve(() => _positionBiasStrategy(tripleFreq, luckFreq, rng)),
+      improve(() => _weightedRandomStrategy(freq, rng)),
     ];
   }
 
+  double _scoreRecommendation(
+    TripleluckRecommendation rec,
+    Map<int, int> freq,
+    Map<int, int> tripleFreq,
+    Map<int, int> luckFreq,
+    Set<int> hot,
+    Set<int> overdue,
+    double avgSum,
+    double avgOddRatio,
+  ) {
+    final maxTriple = tripleFreq.values.isEmpty
+        ? 1
+        : tripleFreq.values.reduce(max);
+    final maxLuck = luckFreq.values.isEmpty ? 1 : luckFreq.values.reduce(max);
+    final positionScore =
+        rec.tripleNumbers
+            .map((n) => (tripleFreq[n] ?? 0) / (maxTriple == 0 ? 1 : maxTriple))
+            .fold<double>(0, (a, b) => a + b) +
+        rec.luckNumbers
+            .map((n) => (luckFreq[n] ?? 0) / (maxLuck == 0 ? 1 : maxLuck))
+            .fold<double>(0, (a, b) => a + b);
+
+    return RecommendationScoring.scoreNumbers(
+          rec.allNumbers,
+          frequency: freq,
+          minNumber: 1,
+          maxNumber: 27,
+          targetCount: 6,
+          targetSum: avgSum,
+          targetOddRatio: avgOddRatio,
+          preferredNumbers: hot,
+          secondaryPreferredNumbers: overdue,
+        ) +
+        positionScore;
+  }
+
   TripleluckRecommendation _hotStrategy(
-      List<int> hot, Map<int, int> tripleFreq, Map<int, int> luckFreq, Random rng) {
+    List<int> hot,
+    Map<int, int> tripleFreq,
+    Map<int, int> luckFreq,
+    Random rng,
+  ) {
     final hotShuffled = List<int>.from(hot)..shuffle(rng);
     final picked = <int>{};
     for (final n in hotShuffled.take(6)) {
@@ -224,7 +295,10 @@ class TripleluckAnalyzer {
   }
 
   TripleluckRecommendation _coldStrategy(
-      List<int> cold, Map<int, int> freq, Random rng) {
+    List<int> cold,
+    Map<int, int> freq,
+    Random rng,
+  ) {
     final picked = <int>{};
     final coldList = List<int>.from(cold)..shuffle(rng);
     for (final n in coldList.take(2)) {
@@ -246,7 +320,10 @@ class TripleluckAnalyzer {
   }
 
   TripleluckRecommendation _mixedStrategy(
-      List<int> hot, List<int> overdue, Random rng) {
+    List<int> hot,
+    List<int> overdue,
+    Random rng,
+  ) {
     final picked = <int>{};
     final hotS = List<int>.from(hot)..shuffle(rng);
     final overdueS = List<int>.from(overdue)..shuffle(rng);
@@ -271,7 +348,10 @@ class TripleluckAnalyzer {
   }
 
   TripleluckRecommendation _positionBiasStrategy(
-      Map<int, int> tripleFreq, Map<int, int> luckFreq, Random rng) {
+    Map<int, int> tripleFreq,
+    Map<int, int> luckFreq,
+    Random rng,
+  ) {
     final tripleSorted = tripleFreq.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     final luckSorted = luckFreq.entries.toList()
@@ -300,7 +380,9 @@ class TripleluckAnalyzer {
   }
 
   TripleluckRecommendation _weightedRandomStrategy(
-      Map<int, int> freq, Random rng) {
+    Map<int, int> freq,
+    Random rng,
+  ) {
     final maxF = freq.values.reduce(max).toDouble();
     final picked = <int>{};
     int attempts = 0;

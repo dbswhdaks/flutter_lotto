@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/lotto_data_service.dart';
 import '../services/lotto_analyzer.dart';
+import '../widgets/ai_boost_badge.dart';
 import '../widgets/lotto_ball.dart';
 
 class AiPage extends StatefulWidget {
@@ -19,7 +20,7 @@ class _AiPageState extends State<AiPage> with SingleTickerProviderStateMixin {
   int _loadedCount = 0;
   int _totalCount = 0;
   FullAnalysisResult? _fullAnalysis;
-  int _recommendRoundCount = 1;
+  final int _recommendRoundCount = 1;
 
   @override
   void initState() {
@@ -94,7 +95,10 @@ class _AiPageState extends State<AiPage> with SingleTickerProviderStateMixin {
           indicatorColor: const Color(0xFFF5A623),
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white54,
-          labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+          labelStyle: const TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 13,
+          ),
           tabs: const [
             Tab(text: '추천번호'),
             Tab(text: '통계분석'),
@@ -105,15 +109,15 @@ class _AiPageState extends State<AiPage> with SingleTickerProviderStateMixin {
       body: _loading
           ? _buildLoading()
           : _error != null
-              ? _buildError()
-              : TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildRecommendTab(),
-                    _buildStatsTab(),
-                    _buildDetailTab(),
-                  ],
-                ),
+          ? _buildError()
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                _buildRecommendTab(),
+                _buildStatsTab(),
+                _buildDetailTab(),
+              ],
+            ),
     );
   }
 
@@ -232,7 +236,8 @@ class _AiPageState extends State<AiPage> with SingleTickerProviderStateMixin {
         children: [
           _infoCard(
             '1회 ~ ${a.latestRound}회 (총 ${a.totalDraws}회) 전체 데이터 기반 분석\n'
-            '제 ${a.latestRound + 1}회 추천번호를 제공합니다',
+            '후보 조합을 점수화해 제 ${a.latestRound + 1}회 추천번호를 제공합니다\n'
+            '무작위 추첨 특성상 당첨을 보장하지는 않습니다',
             const Color(0xFFF5A623),
           ),
           const SizedBox(height: 16),
@@ -362,13 +367,17 @@ class _AiPageState extends State<AiPage> with SingleTickerProviderStateMixin {
                   fontWeight: FontWeight.w600,
                 ),
               ),
+              const SizedBox(width: 8),
+              const AiBoostBadge(),
             ],
           ),
           const SizedBox(height: 10),
           Wrap(
             spacing: 6,
             runSpacing: 6,
-            children: set.numbers.map((n) => LottoBall(number: n, size: 40)).toList(),
+            children: set.numbers
+                .map((n) => LottoBall(number: n, size: 40))
+                .toList(),
           ),
           const SizedBox(height: 6),
           Text(
@@ -431,14 +440,17 @@ class _AiPageState extends State<AiPage> with SingleTickerProviderStateMixin {
 
           _sectionTitle('📈 기본 통계'),
           _statRow('총 분석 회차', '${a.totalDraws}회'),
-          _statRow('평균 홀수 비율', '${(a.avgOddEvenRatio * 100).toStringAsFixed(1)}%'),
+          _statRow(
+            '평균 홀수 비율',
+            '${(a.avgOddEvenRatio * 100).toStringAsFixed(1)}%',
+          ),
           _statRow('평균 번호 합계', a.avgSum.toStringAsFixed(0)),
           const SizedBox(height: 20),
 
           if (a.recentTrend.isNotEmpty) ...[
             _sectionTitle('📉 최근 추세'),
-            ...a.recentTrend.entries.map((e) =>
-              _statRow(e.key, e.value.toStringAsFixed(1)),
+            ...a.recentTrend.entries.map(
+              (e) => _statRow(e.key, e.value.toStringAsFixed(1)),
             ),
             const SizedBox(height: 20),
           ],
@@ -598,7 +610,10 @@ class _AiPageState extends State<AiPage> with SingleTickerProviderStateMixin {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: Colors.white70, fontSize: 14)),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
+          ),
           Text(
             value,
             style: const TextStyle(
@@ -668,7 +683,9 @@ class _AiPageState extends State<AiPage> with SingleTickerProviderStateMixin {
   }
 
   Widget _buildEndDigitChart(Map<int, int> endDigitFreq) {
-    final maxVal = endDigitFreq.values.fold(0, (a, b) => a > b ? a : b).toDouble();
+    final maxVal = endDigitFreq.values
+        .fold(0, (a, b) => a > b ? a : b)
+        .toDouble();
     return Column(
       children: List.generate(10, (digit) {
         final count = endDigitFreq[digit] ?? 0;
@@ -731,10 +748,12 @@ class _AiPageState extends State<AiPage> with SingleTickerProviderStateMixin {
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         children: [
-          ...numbers.map((n) => Padding(
-            padding: const EdgeInsets.only(right: 4),
-            child: LottoBall(number: n, size: 26),
-          )),
+          ...numbers.map(
+            (n) => Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: LottoBall(number: n, size: 26),
+            ),
+          ),
           const Spacer(),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -757,7 +776,8 @@ class _AiPageState extends State<AiPage> with SingleTickerProviderStateMixin {
   }
 
   Widget _buildConsecutiveChart(Map<int, int> counts) {
-    final sorted = counts.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
+    final sorted = counts.entries.toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
     final total = sorted.fold<int>(0, (s, e) => s + e.value);
 
     return Column(

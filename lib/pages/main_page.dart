@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'lotto_home_page.dart';
+import 'lotto_store_page.dart';
 import 'pension_page.dart';
 import 'powerball_page.dart';
 import 'speedkino_page.dart';
@@ -73,289 +74,353 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF1A1A2E), Color(0xFF16213E), Color(0xFF0F3460)],
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF0B0F1F),
+                  Color(0xFF111935),
+                  Color(0xFF0A1F3D),
+                ],
+              ),
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: FadeTransition(
-            opacity: _fadeIn,
-            child: SlideTransition(
-              position: _slideUp,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 32),
-                    _buildTitle(),
-                    const SizedBox(height: 28),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            _LotteryCard(
-                              title: '로또 6/45',
-                              subtitle: '행운의 번호를 뽑아보세요!',
-                              icon: Icons.casino,
-                              gradientColors: const [
-                                Color(0xFF7C3AED),
-                                Color(0xFF9F7AEA),
-                                Color(0xFFB794F4),
-                              ],
-                              shadowColor: const Color(0xFF7C3AED),
-                              features: const [
-                                '번호 추첨 애니메이션',
-                                '번호 생성',
-                                '통계 분석',
-                              ],
-                              onTap: () => _navigateTo(const LottoHomePage()),
-                              delay: const Duration(milliseconds: 200),
-                            ),
-                            const SizedBox(height: 16),
-                            _LotteryCard(
-                              title: '연금복권 720+',
-                              subtitle: '매월 700만원 × 20년의 행운!',
-                              icon: Icons.monetization_on,
-                              gradientColors: const [
-                                Color(0xFFFF8C00),
-                                Color(0xFFFFB347),
-                                Color(0xFFFFD700),
-                              ],
-                              shadowColor: const Color(0xFFFFB347),
-                              features: const [
-                                '슬롯 애니메이션',
-                                '조 + 6자리 추첨',
-                                '번호 분석',
-                              ],
-                              onTap: () => _navigateTo(const PensionPage()),
-                              delay: const Duration(milliseconds: 400),
-                            ),
-                            const SizedBox(height: 16),
-                            _LotteryCard(
-                              title: '파워볼',
-                              subtitle: '5개 번호 + 파워볼의 짜릿함!',
-                              icon: Icons.bolt,
-                              gradientColors: const [
-                                Color(0xFFFF4757),
-                                Color(0xFFFF6B81),
-                                Color(0xFFFF8A9B),
-                              ],
-                              shadowColor: const Color(0xFFFF4757),
-                              features: const [
-                                '1~28 중 5개 추첨',
-                                '파워볼 0~9',
-                                '번호 분석',
-                              ],
-                              onTap: () => _navigateTo(const PowerballPage()),
-                              delay: const Duration(milliseconds: 600),
-                            ),
-                            const SizedBox(height: 16),
-                            _LotteryCard(
-                              title: '스피드키노',
-                              subtitle: '5분마다 추첨! 빠른 행운!',
-                              icon: Icons.speed,
-                              gradientColors: const [
-                                Color(0xFF2ECC71),
-                                Color(0xFF27AE60),
-                                Color(0xFF58D68D),
-                              ],
-                              shadowColor: const Color(0xFF2ECC71),
-                              features: const [
-                                '1~70 중 10개 추첨',
-                                '5분마다 288회',
-                                '번호 분석',
-                              ],
-                              onTap: () => _navigateTo(const SpeedkinoPage()),
-                              delay: const Duration(milliseconds: 800),
-                            ),
-                            const SizedBox(height: 16),
-                            _LotteryCard(
-                              title: '메가빙고',
-                              subtitle: '4×4 빙고로 행운을 잡아라!',
-                              icon: Icons.grid_view_rounded,
-                              gradientColors: const [
-                                Color(0xFFDA70D6),
-                                Color(0xFF8E44AD),
-                                Color(0xFFBB6BD9),
-                              ],
-                              shadowColor: const Color(0xFFDA70D6),
-                              features: const [
-                                '1~40 중 20개 추첨',
-                                '4×4 빙고판',
-                                '번호 분석',
-                              ],
-                              onTap: () => _navigateTo(const MegabingoPage()),
-                              delay: const Duration(milliseconds: 1000),
-                            ),
-                            const SizedBox(height: 16),
-                            _LotteryCard(
-                              title: '트리플럭',
-                              subtitle: '트리플 3개 + 럭 3개의 조합!',
-                              icon: Icons.filter_3,
-                              gradientColors: const [
-                                Color(0xFF00BCD4),
-                                Color(0xFF0097A7),
-                                Color(0xFF4DD0E1),
-                              ],
-                              shadowColor: const Color(0xFF00BCD4),
-                              features: const [
-                                '1~27 중 6개 추첨',
-                                '트리플 + 럭',
-                                '번호 분석',
-                              ],
-                              onTap: () => _navigateTo(const TripleluckPage()),
-                              delay: const Duration(milliseconds: 1200),
-                            ),
-                            const SizedBox(height: 16),
-                            _LotteryCard(
-                              title: '더블잭마이더스',
-                              subtitle: '잭 6개 + 마이더스 6개의 황금 조합!',
-                              icon: Icons.workspace_premium,
-                              gradientColors: const [
-                                Color(0xFFFFB300),
-                                Color(0xFFFF8F00),
-                                Color(0xFFFFD54F),
-                              ],
-                              shadowColor: const Color(0xFFFFB300),
-                              features: const [
-                                '1~45 중 6개 × 2세트',
-                                '잭 + 마이더스',
-                                '번호 분석',
-                              ],
-                              onTap: () => _navigateTo(const DoublejackPage()),
-                              delay: const Duration(milliseconds: 1400),
-                            ),
-                            const SizedBox(height: 16),
-                            _LotteryCard(
-                              title: '트레져헌터',
-                              subtitle: '6개 번호 + 보물번호의 모험!',
-                              icon: Icons.diamond,
-                              gradientColors: const [
-                                Color(0xFF2ECC71),
-                                Color(0xFF1ABC9C),
-                                Color(0xFF00E676),
-                              ],
-                              shadowColor: const Color(0xFF2ECC71),
-                              features: const [
-                                '1~35 중 6개 추첨',
-                                '보물번호 1~10',
-                                '번호 분석',
-                              ],
-                              onTap: () => _navigateTo(const TreasurePage()),
-                              delay: const Duration(milliseconds: 1600),
-                            ),
-                            const SizedBox(height: 16),
-                            _LotteryCard(
-                              title: '캐치미',
-                              subtitle: '1개 번호를 골라 맞춰라!',
-                              icon: Icons.gps_fixed,
-                              gradientColors: const [
-                                Color(0xFFE91E63),
-                                Color(0xFFC2185B),
-                                Color(0xFFFF80AB),
-                              ],
-                              shadowColor: const Color(0xFFE91E63),
-                              features: const [
-                                '1~45 중 1개 선택',
-                                '번호 매칭 게임',
-                                '번호 분석',
-                              ],
-                              onTap: () => _navigateTo(const CatchmePage()),
-                              delay: const Duration(milliseconds: 1800),
-                            ),
-                            const SizedBox(height: 20),
-                          ],
+          const Positioned(
+            top: -90,
+            left: -70,
+            child: _GlowOrb(
+              color: Color(0xFFF5A623),
+              size: 260,
+              opacity: 0.20,
+            ),
+          ),
+          const Positioned(
+            top: 220,
+            right: -110,
+            child: _GlowOrb(
+              color: Color(0xFF7C3AED),
+              size: 240,
+              opacity: 0.12,
+            ),
+          ),
+          const Positioned(
+            bottom: -110,
+            right: -80,
+            child: _GlowOrb(
+              color: Color(0xFF4FD1C5),
+              size: 300,
+              opacity: 0.14,
+            ),
+          ),
+          SafeArea(
+            child: FadeTransition(
+              opacity: _fadeIn,
+              child: SlideTransition(
+                position: _slideUp,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 24),
+                      _buildTitle(),
+                      const SizedBox(height: 22),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Column(
+                            children: [
+                              _LotteryCard(
+                                title: '로또 6/45',
+                                subtitle: '행운의 번호를 뽑아보세요!',
+                                icon: Icons.casino,
+                                gradientColors: const [
+                                  Color(0xFF7C3AED),
+                                  Color(0xFF9F7AEA),
+                                  Color(0xFFB794F4),
+                                ],
+                                shadowColor: const Color(0xFF7C3AED),
+                                features: const [
+                                  '번호 추첨 애니메이션',
+                                  '번호 생성',
+                                  '통계 분석',
+                                ],
+                                onTap: () => _navigateTo(const LottoHomePage()),
+                                delay: const Duration(milliseconds: 200),
+                              ),
+                              const SizedBox(height: 14),
+                              _LotteryCard(
+                                title: '연금복권 720+',
+                                subtitle: '매월 700만원 × 20년의 행운!',
+                                icon: Icons.monetization_on,
+                                gradientColors: const [
+                                  Color(0xFFFF8C00),
+                                  Color(0xFFFFB347),
+                                  Color(0xFFFFD700),
+                                ],
+                                shadowColor: const Color(0xFFFFB347),
+                                features: const [
+                                  '슬롯 애니메이션',
+                                  '조 + 6자리 추첨',
+                                  '번호 분석',
+                                ],
+                                onTap: () => _navigateTo(const PensionPage()),
+                                delay: const Duration(milliseconds: 400),
+                              ),
+                              const SizedBox(height: 14),
+                              _LotteryCard(
+                                title: '파워볼',
+                                subtitle: '5개 번호 + 파워볼의 짜릿함!',
+                                icon: Icons.bolt,
+                                gradientColors: const [
+                                  Color(0xFFFF4757),
+                                  Color(0xFFFF6B81),
+                                  Color(0xFFFF8A9B),
+                                ],
+                                shadowColor: const Color(0xFFFF4757),
+                                features: const [
+                                  '1~28 중 5개 추첨',
+                                  '파워볼 0~9',
+                                  '번호 분석',
+                                ],
+                                onTap: () => _navigateTo(const PowerballPage()),
+                                delay: const Duration(milliseconds: 600),
+                              ),
+                              const SizedBox(height: 14),
+                              _LotteryCard(
+                                title: '스피드키노',
+                                subtitle: '5분마다 추첨! 빠른 행운!',
+                                icon: Icons.speed,
+                                gradientColors: const [
+                                  Color(0xFF2ECC71),
+                                  Color(0xFF27AE60),
+                                  Color(0xFF58D68D),
+                                ],
+                                shadowColor: const Color(0xFF2ECC71),
+                                features: const [
+                                  '1~70 중 10개 추첨',
+                                  '5분마다 288회',
+                                  '번호 분석',
+                                ],
+                                onTap: () => _navigateTo(const SpeedkinoPage()),
+                                delay: const Duration(milliseconds: 800),
+                              ),
+                              const SizedBox(height: 14),
+                              _LotteryCard(
+                                title: '메가빙고',
+                                subtitle: '4×4 빙고로 행운을 잡아라!',
+                                icon: Icons.grid_view_rounded,
+                                gradientColors: const [
+                                  Color(0xFFDA70D6),
+                                  Color(0xFF8E44AD),
+                                  Color(0xFFBB6BD9),
+                                ],
+                                shadowColor: const Color(0xFFDA70D6),
+                                features: const [
+                                  '1~40 중 20개 추첨',
+                                  '4×4 빙고판',
+                                  '번호 분석',
+                                ],
+                                onTap: () => _navigateTo(const MegabingoPage()),
+                                delay: const Duration(milliseconds: 1000),
+                              ),
+                              const SizedBox(height: 14),
+                              _LotteryCard(
+                                title: '트리플럭',
+                                subtitle: '트리플 3개 + 럭 3개의 조합!',
+                                icon: Icons.filter_3,
+                                gradientColors: const [
+                                  Color(0xFF00BCD4),
+                                  Color(0xFF0097A7),
+                                  Color(0xFF4DD0E1),
+                                ],
+                                shadowColor: const Color(0xFF00BCD4),
+                                features: const [
+                                  '1~27 중 6개 추첨',
+                                  '트리플 + 럭',
+                                  '번호 분석',
+                                ],
+                                onTap: () => _navigateTo(const TripleluckPage()),
+                                delay: const Duration(milliseconds: 1200),
+                              ),
+                              const SizedBox(height: 14),
+                              _LotteryCard(
+                                title: '더블잭마이더스',
+                                subtitle: '잭 6개 + 마이더스 6개의 황금 조합!',
+                                icon: Icons.workspace_premium,
+                                gradientColors: const [
+                                  Color(0xFFFFB300),
+                                  Color(0xFFFF8F00),
+                                  Color(0xFFFFD54F),
+                                ],
+                                shadowColor: const Color(0xFFFFB300),
+                                features: const [
+                                  '1~45 중 6개 × 2세트',
+                                  '잭 + 마이더스',
+                                  '번호 분석',
+                                ],
+                                onTap: () => _navigateTo(const DoublejackPage()),
+                                delay: const Duration(milliseconds: 1400),
+                              ),
+                              const SizedBox(height: 14),
+                              _LotteryCard(
+                                title: '트레져헌터',
+                                subtitle: '6개 번호 + 보물번호의 모험!',
+                                icon: Icons.diamond,
+                                gradientColors: const [
+                                  Color(0xFF2ECC71),
+                                  Color(0xFF1ABC9C),
+                                  Color(0xFF00E676),
+                                ],
+                                shadowColor: const Color(0xFF2ECC71),
+                                features: const [
+                                  '1~35 중 6개 추첨',
+                                  '보물번호 1~10',
+                                  '번호 분석',
+                                ],
+                                onTap: () => _navigateTo(const TreasurePage()),
+                                delay: const Duration(milliseconds: 1600),
+                              ),
+                              const SizedBox(height: 14),
+                              _LotteryCard(
+                                title: '캐치미',
+                                subtitle: '1개 번호를 골라 맞춰라!',
+                                icon: Icons.gps_fixed,
+                                gradientColors: const [
+                                  Color(0xFFE91E63),
+                                  Color(0xFFC2185B),
+                                  Color(0xFFFF80AB),
+                                ],
+                                shadowColor: const Color(0xFFE91E63),
+                                features: const [
+                                  '1~45 중 1개 선택',
+                                  '번호 매칭 게임',
+                                  '번호 분석',
+                                ],
+                                onTap: () => _navigateTo(const CatchmePage()),
+                                delay: const Duration(milliseconds: 1800),
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '※ 본 앱은 공식 동행복권 앱이 아니며 번호 추천 및 통계 참고',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.5),
-                              fontSize: 11,
-                              height: 1.4,
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 10),
-                            child: Text(
-                              '용 앱입니다',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.5),
-                                fontSize: 11,
-                                height: 1.4,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
+                      const SizedBox(height: 12),
+                      _buildDisclaimer(),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildTitle() {
-    return Column(
-      children: [
-        SizedBox(
-          height: 48,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: 40,
-                height: 40,
-                child: Center(
-                  child: Text(
-                    '🎯',
-                    style: TextStyle(
-                      fontSize: 24,
+    return SizedBox(
+      height: 56,
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFFFFC93C), Color(0xFFF5A623), Color(0xFFFF6B6B)],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFF5A623).withValues(alpha: 0.45),
+                  blurRadius: 20,
+                  spreadRadius: -2,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Text('🎯', style: TextStyle(fontSize: 22)),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ShaderMask(
+                  shaderCallback: (rect) => const LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      Color(0xFFFFE08A),
+                      Color(0xFFF5A623),
+                      Color(0xFFFF8A65),
+                    ],
+                  ).createShader(rect),
+                  child: const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Lotto 번호 통계 분석',
+                      maxLines: 1,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.5,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              const Text(
-                'Lotto 번호 통계 분석',
-                style: TextStyle(
-                  color: Color(0xFFF5A623),
-                  fontSize: 22,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.5,
+                const SizedBox(height: 3),
+                Row(
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xFF4FD1C5),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(
+                              0xFF4FD1C5,
+                            ).withValues(alpha: 0.7),
+                            blurRadius: 6,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    const Text(
+                      '오늘의 행운 도전!',
+                      style: TextStyle(
+                        color: Color(0xFF4FD1C5),
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(width: 12),
-              _buildShareButton(),
-            ],
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          '오늘의 행운 도전!',
-          style: TextStyle(
-            color: const Color(0xFF4FD1C5),
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
+          const SizedBox(width: 8),
+          _buildShareButton(),
+          const SizedBox(width: 8),
+          _buildMenuButton(),
+        ],
+      ),
     );
   }
 
@@ -375,20 +440,292 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         height: 40,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: const Color(0xFFF5A623).withValues(alpha: 0.1),
-          border: Border.all(
-            color: const Color(0xFFF5A623).withValues(alpha: 0.3),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white.withValues(alpha: 0.10),
+              Colors.white.withValues(alpha: 0.03),
+            ],
           ),
+          border: Border.all(
+            color: const Color(0xFFF5A623).withValues(alpha: 0.40),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFF5A623).withValues(alpha: 0.18),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        child: Icon(
+        child: const Icon(
           Icons.share_rounded,
-          color: const Color(0xFFF5A623).withValues(alpha: 0.8),
-          size: 20,
+          color: Color(0xFFF5A623),
+          size: 18,
         ),
       ),
     );
   }
 
+  Widget _buildMenuButton() {
+    return GestureDetector(
+      onTap: _openMenuSheet,
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white.withValues(alpha: 0.10),
+              Colors.white.withValues(alpha: 0.03),
+            ],
+          ),
+          border: Border.all(
+            color: const Color(0xFF4FD1C5).withValues(alpha: 0.40),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF4FD1C5).withValues(alpha: 0.18),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: const Icon(
+          Icons.menu_rounded,
+          color: Color(0xFF4FD1C5),
+          size: 18,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDisclaimer() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 1),
+            child: Icon(
+              Icons.info_outline_rounded,
+              color: Colors.white.withValues(alpha: 0.45),
+              size: 14,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              '본 앱은 공식 동행복권 앱이 아니며 번호 추천 및 통계 참고용 앱입니다',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.55),
+                fontSize: 11,
+                height: 1.4,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _openMenuSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) {
+        return Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF1A1A2E), Color(0xFF0F1B33)],
+            ),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 44,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.25),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    '메뉴',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.55),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                _MenuTile(
+                  icon: Icons.storefront_rounded,
+                  iconColor: const Color(0xFFF5A623),
+                  title: '로또 판매점 찾기',
+                  subtitle: '내 위치 기준 거리순 + 길찾기 연결',
+                  onTap: () {
+                    Navigator.of(sheetCtx).pop();
+                    _navigateTo(const LottoStorePage());
+                  },
+                ),
+                const SizedBox(height: 10),
+                _MenuTile(
+                  icon: Icons.share_rounded,
+                  iconColor: const Color(0xFF4FD1C5),
+                  title: '앱 공유하기',
+                  subtitle: '친구에게 추천하기',
+                  onTap: () {
+                    Navigator.of(sheetCtx).pop();
+                    SharePlus.instance.share(
+                      ShareParams(
+                        text:
+                            '🎯 Lotto 번호 통계 분석으로 행운의 번호를 뽑아보세요!\n'
+                            '로또 6/45, 연금복권, 파워볼 등 다양한 복권 번호를 통계 기반으로 추천해드립니다.',
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _GlowOrb extends StatelessWidget {
+  final Color color;
+  final double size;
+  final double opacity;
+
+  const _GlowOrb({
+    required this.color,
+    required this.size,
+    required this.opacity,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(
+            colors: [
+              color.withValues(alpha: opacity),
+              color.withValues(alpha: 0),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MenuTile extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _MenuTile({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: iconColor.withValues(alpha: 0.18),
+                ),
+                child: Icon(icon, color: iconColor, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.55),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: Colors.white.withValues(alpha: 0.35),
+                size: 14,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _LotteryCard extends StatefulWidget {
@@ -421,6 +758,7 @@ class _LotteryCardState extends State<_LotteryCard>
   late final AnimationController _controller;
   late final Animation<double> _scale;
   late final Animation<double> _opacity;
+  bool _isPressed = false;
 
   @override
   void initState() {
@@ -461,127 +799,186 @@ class _LotteryCardState extends State<_LotteryCard>
         );
       },
       child: GestureDetector(
+        onTapDown: (_) => setState(() => _isPressed = true),
+        onTapUp: (_) => setState(() => _isPressed = false),
+        onTapCancel: () => setState(() => _isPressed = false),
         onTap: widget.onTap,
-        child: Container(
-          padding: const EdgeInsets.all(24),
+        child: AnimatedScale(
+          scale: _isPressed ? 0.97 : 1.0,
+          duration: const Duration(milliseconds: 130),
+          curve: Curves.easeOut,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(18, 18, 16, 18),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(22),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  widget.gradientColors[0].withValues(alpha: 0.30),
+                  widget.gradientColors[1].withValues(alpha: 0.14),
+                  Colors.white.withValues(alpha: 0.02),
+                ],
+              ),
+              border: Border.all(
+                color: widget.gradientColors[0].withValues(alpha: 0.35),
+                width: 1.2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: widget.shadowColor.withValues(alpha: 0.22),
+                  blurRadius: 28,
+                  offset: const Offset(0, 12),
+                ),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.25),
+                  blurRadius: 14,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                _buildIcon(),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 19,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        widget.subtitle,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.72),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w500,
+                          height: 1.25,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 5,
+                        children: widget.features.map((f) {
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 9,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              gradient: LinearGradient(
+                                colors: [
+                                  widget.gradientColors[0].withValues(
+                                    alpha: 0.22,
+                                  ),
+                                  widget.gradientColors[1].withValues(
+                                    alpha: 0.12,
+                                  ),
+                                ],
+                              ),
+                              border: Border.all(
+                                color: widget.gradientColors[0].withValues(
+                                  alpha: 0.32,
+                                ),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Text(
+                              f,
+                              style: TextStyle(
+                                color: Color.lerp(
+                                  widget.gradientColors[2],
+                                  Colors.white,
+                                  0.25,
+                                ),
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.1,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 6),
+                _buildArrow(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIcon() {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Container(
+          width: 60,
+          height: 60,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
+            shape: BoxShape.circle,
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                widget.gradientColors[0].withValues(alpha: 0.25),
-                widget.gradientColors[1].withValues(alpha: 0.12),
-                widget.gradientColors[2].withValues(alpha: 0.05),
-              ],
-            ),
-            border: Border.all(
-              color: widget.gradientColors[0].withValues(alpha: 0.3),
-              width: 1.5,
+              colors: [widget.gradientColors[0], widget.gradientColors[1]],
             ),
             boxShadow: [
               BoxShadow(
-                color: widget.shadowColor.withValues(alpha: 0.15),
-                blurRadius: 24,
-                offset: const Offset(0, 8),
-              ),
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
-                blurRadius: 12,
+                color: widget.gradientColors[0].withValues(alpha: 0.55),
+                blurRadius: 18,
+                spreadRadius: -2,
                 offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: Row(
-            children: [
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      widget.gradientColors[0],
-                      widget.gradientColors[1],
-                    ],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: widget.gradientColors[0].withValues(alpha: 0.4),
-                      blurRadius: 16,
-                      spreadRadius: -2,
-                    ),
-                  ],
-                ),
-                child: Icon(widget.icon, color: Colors.white, size: 30),
-              ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.title,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.3,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.subtitle,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
-                        fontSize: 13,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 4,
-                      children: widget.features.map((f) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            color: widget.gradientColors[0].withValues(
-                              alpha: 0.15,
-                            ),
-                            border: Border.all(
-                              color: widget.gradientColors[0].withValues(
-                                alpha: 0.25,
-                              ),
-                            ),
-                          ),
-                          child: Text(
-                            f,
-                            style: TextStyle(
-                              color: widget.gradientColors[1],
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios,
-                color: Colors.white.withValues(alpha: 0.3),
-                size: 18,
-              ),
-            ],
+          child: Icon(widget.icon, color: Colors.white, size: 28),
+        ),
+        Positioned(
+          top: 9,
+          left: 12,
+          child: Container(
+            width: 10,
+            height: 6,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.45),
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _buildArrow() {
+    return Container(
+      width: 30,
+      height: 30,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: widget.gradientColors[0].withValues(alpha: 0.20),
+        border: Border.all(
+          color: widget.gradientColors[0].withValues(alpha: 0.30),
+          width: 1,
+        ),
+      ),
+      child: Icon(
+        Icons.arrow_forward_ios_rounded,
+        color: Colors.white.withValues(alpha: 0.85),
+        size: 12,
       ),
     );
   }

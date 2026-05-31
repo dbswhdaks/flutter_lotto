@@ -1,5 +1,6 @@
 import 'dart:math';
 import '../models/doublejack_draw.dart';
+import '../utils/recommendation_scoring.dart';
 
 class DoublejackAnalysisResult {
   final Map<int, int> frequency;
@@ -58,8 +59,16 @@ class DoublejackAnalyzer {
     final range = _getRangeDistribution();
     final oddRatio = _getAvgOddRatio();
     final avgSum = _getAvgSum();
-    final recs =
-        _generateRecommendations(freq, jackFreq, midasFreq, hot, cold, overdue);
+    final recs = _generateRecommendations(
+      freq,
+      jackFreq,
+      midasFreq,
+      hot,
+      cold,
+      overdue,
+      avgSum,
+      oddRatio,
+    );
 
     return DoublejackAnalysisResult(
       frequency: freq,
@@ -149,9 +158,7 @@ class DoublejackAnalyzer {
 
   Map<String, double> _getRangeDistribution() {
     if (draws.isEmpty) return {};
-    final ranges = {
-      '1-9': 0, '10-18': 0, '19-27': 0, '28-36': 0, '37-45': 0
-    };
+    final ranges = {'1-9': 0, '10-18': 0, '19-27': 0, '28-36': 0, '37-45': 0};
     int total = 0;
     for (final d in draws) {
       for (final n in d.allNumbers) {
@@ -197,19 +204,80 @@ class DoublejackAnalyzer {
     List<int> hot,
     List<int> cold,
     List<int> overdue,
+    double avgSum,
+    double avgOddRatio,
   ) {
     final rng = Random();
+    DoublejackRecommendation improve(
+      DoublejackRecommendation Function() picker,
+    ) {
+      return RecommendationScoring.bestCandidate(
+        rng: rng,
+        picker: picker,
+        score: (rec) => _scoreRecommendation(
+          rec,
+          freq,
+          jackFreq,
+          midasFreq,
+          hot.toSet(),
+          overdue.toSet(),
+          avgSum,
+          avgOddRatio,
+        ),
+      );
+    }
+
     return [
-      _hotStrategy(hot, freq, rng),
-      _coldStrategy(cold, freq, rng),
-      _mixedStrategy(hot, overdue, rng),
-      _positionBiasStrategy(jackFreq, midasFreq, rng),
-      _weightedRandomStrategy(freq, rng),
+      improve(() => _hotStrategy(hot, freq, rng)),
+      improve(() => _coldStrategy(cold, freq, rng)),
+      improve(() => _mixedStrategy(hot, overdue, rng)),
+      improve(() => _positionBiasStrategy(jackFreq, midasFreq, rng)),
+      improve(() => _weightedRandomStrategy(freq, rng)),
     ];
   }
 
+  double _scoreRecommendation(
+    DoublejackRecommendation rec,
+    Map<int, int> freq,
+    Map<int, int> jackFreq,
+    Map<int, int> midasFreq,
+    Set<int> hot,
+    Set<int> overdue,
+    double avgSum,
+    double avgOddRatio,
+  ) {
+    final numbers = [...rec.jackNumbers, ...rec.midasNumbers];
+    final maxJack = jackFreq.values.isEmpty ? 1 : jackFreq.values.reduce(max);
+    final maxMidas = midasFreq.values.isEmpty
+        ? 1
+        : midasFreq.values.reduce(max);
+    final positionScore =
+        rec.jackNumbers
+            .map((n) => (jackFreq[n] ?? 0) / (maxJack == 0 ? 1 : maxJack))
+            .fold<double>(0, (a, b) => a + b) +
+        rec.midasNumbers
+            .map((n) => (midasFreq[n] ?? 0) / (maxMidas == 0 ? 1 : maxMidas))
+            .fold<double>(0, (a, b) => a + b);
+
+    return RecommendationScoring.scoreNumbers(
+          numbers,
+          frequency: freq,
+          minNumber: 1,
+          maxNumber: 45,
+          targetCount: 12,
+          targetSum: avgSum,
+          targetOddRatio: avgOddRatio,
+          preferredNumbers: hot,
+          secondaryPreferredNumbers: overdue,
+        ) +
+        positionScore;
+  }
+
   DoublejackRecommendation _hotStrategy(
-      List<int> hot, Map<int, int> freq, Random rng) {
+    List<int> hot,
+    Map<int, int> freq,
+    Random rng,
+  ) {
     final pool = <int>{...hot};
     final sorted = freq.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
@@ -227,7 +295,10 @@ class DoublejackAnalyzer {
   }
 
   DoublejackRecommendation _coldStrategy(
-      List<int> cold, Map<int, int> freq, Random rng) {
+    List<int> cold,
+    Map<int, int> freq,
+    Random rng,
+  ) {
     final picked = <int>{};
     final coldList = List<int>.from(cold)..shuffle(rng);
     for (final n in coldList.take(4)) {
@@ -249,7 +320,10 @@ class DoublejackAnalyzer {
   }
 
   DoublejackRecommendation _mixedStrategy(
-      List<int> hot, List<int> overdue, Random rng) {
+    List<int> hot,
+    List<int> overdue,
+    Random rng,
+  ) {
     final picked = <int>{};
     final hotS = List<int>.from(hot)..shuffle(rng);
     final overdueS = List<int>.from(overdue)..shuffle(rng);
@@ -274,7 +348,10 @@ class DoublejackAnalyzer {
   }
 
   DoublejackRecommendation _positionBiasStrategy(
-      Map<int, int> jackFreq, Map<int, int> midasFreq, Random rng) {
+    Map<int, int> jackFreq,
+    Map<int, int> midasFreq,
+    Random rng,
+  ) {
     final jackSorted = jackFreq.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     final midasSorted = midasFreq.entries.toList()
@@ -303,7 +380,9 @@ class DoublejackAnalyzer {
   }
 
   DoublejackRecommendation _weightedRandomStrategy(
-      Map<int, int> freq, Random rng) {
+    Map<int, int> freq,
+    Random rng,
+  ) {
     final maxF = freq.values.reduce(max).toDouble();
     final picked = <int>{};
     int attempts = 0;
