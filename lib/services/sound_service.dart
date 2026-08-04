@@ -77,18 +77,18 @@ class SoundService {
     if (_initialized) return;
     try {
       final dir = await getTemporaryDirectory();
-      _soundBaseDir = Directory('${dir.path}/lotto_sounds_v9');
+      _soundBaseDir = Directory('${dir.path}/lotto_sounds_v12');
       if (!_soundBaseDir.existsSync()) {
         _soundBaseDir.createSync(recursive: true);
       }
 
-      await _startPlayer.setVolume(0.85);
-      await _ballPlayer.setVolume(0.9);
+      await _startPlayer.setVolume(1.0);
+      await _ballPlayer.setVolume(1.0);
       await _completePlayer.setVolume(1.0);
       await _specialPlayer.setVolume(1.0);
-      await _bouncePlayer.setVolume(0.7);
-      await _whooshPlayer.setVolume(0.6);
-      await _mixPlayer.setVolume(0.35);
+      await _bouncePlayer.setVolume(0.85);
+      await _whooshPlayer.setVolume(0.80);
+      await _mixPlayer.setVolume(0.45);
 
       _initialized = true;
       await _ensureGameSounds(_currentGame);
@@ -99,13 +99,23 @@ class SoundService {
 
   Future<void> setGameType(GameType type) async {
     _currentGame = type;
+    // init() 완료 전에 호출되면 게임 타입만 기록하고 대기.
+    // init() 마지막에서 _currentGame 에 대해 _ensureGameSounds 를 호출한다.
+    if (!_initialized) return;
     await _ensureGameSounds(type);
   }
 
   Future<void> _ensureGameSounds(GameType type) async {
-    if (_gameSounds.containsKey(type)) return;
+    // _soundBaseDir 는 init() 안에서만 초기화되므로 필수 방어.
+    if (!_initialized) return;
+    final gameDir = Directory('${_soundBaseDir.path}/${type.name}');
+    // 캐시 되어 있어도 파일이 실제로 존재하는지 검증.
+    if (_gameSounds.containsKey(type)) {
+      final startPath = _gameSounds[type]?.startPath;
+      if (startPath != null && File(startPath).existsSync()) return;
+      _gameSounds.remove(type);
+    }
     try {
-      final gameDir = Directory('${_soundBaseDir.path}/${type.name}');
       if (!gameDir.existsSync()) gameDir.createSync(recursive: true);
 
       final sounds = _GameSounds();
@@ -335,47 +345,81 @@ class SoundService {
 
   // ─── Tone Generators ────────────────────────────────
 
+  /// 노트 어택 램프. 짧은 페이드-인으로 클릭 잡음 억제.
+  double _attack(double t, double ms) {
+    final a = ms * 0.001;
+    if (t >= a) return 1.0;
+    final x = t / a;
+    // easeOutQuad
+    return x * (2 - x);
+  }
+
   double _rawTone(_ToneType type, double t, double freq, double env) {
+    final w = 2 * pi * freq;
     switch (type) {
       case _ToneType.brass:
-        return (sin(2 * pi * freq * t) +
-                sin(2 * pi * freq * 0.5 * t) * 0.35 +
-                sin(2 * pi * freq * 2 * t) * 0.20 +
-                sin(2 * pi * freq * 3 * t) * 0.10) *
-            env;
+        {
+          // 부드러운 아날로그 신스 브라스. 홀수 배음 위주로 살짝 완만하게.
+          final atk = _attack(t, 5);
+          final v = sin(w * t) * 1.00 +
+              sin(w * 2 * t + 0.15) * 0.30 * exp(-t * 5) +
+              sin(w * 3 * t + 0.30) * 0.15 * exp(-t * 9) +
+              sin(w * 0.5 * t) * 0.32;
+          return v * env * atk * 1.00;
+        }
       case _ToneType.bell:
-        return (sin(2 * pi * freq * t) +
-                sin(2 * pi * freq * 2.0 * t) * 0.50 +
-                sin(2 * pi * freq * 3.01 * t) * 0.30 +
-                sin(2 * pi * freq * 4.07 * t) * 0.20 +
-                sin(2 * pi * freq * 5.12 * t) * 0.10) *
-            env;
+        {
+          // 물리적으로 정확한 종 하모닉 비율 (Tubular Bell approx).
+          const bellRatios = [1.00, 2.76, 5.40, 8.93, 13.34];
+          const bellAmps = [1.00, 0.55, 0.30, 0.15, 0.08];
+          const bellDecays = [0.9, 1.5, 2.3, 3.4, 4.8];
+          final atk = _attack(t, 2);
+          double v = 0;
+          for (int i = 0; i < bellRatios.length; i++) {
+            v += sin(w * bellRatios[i] * t + i * 0.11) *
+                bellAmps[i] *
+                exp(-t * bellDecays[i]);
+          }
+          return v * env * atk * 0.95;
+        }
       case _ToneType.synth:
-        return (sin(2 * pi * freq * t) +
-                sin(2 * pi * freq * 3 * t) * 0.33 +
-                sin(2 * pi * freq * 5 * t) * 0.20 +
-                sin(2 * pi * freq * 0.5 * t) * 0.50) *
-            env;
+        {
+          // 유리처럼 부드러운 미니멀 신스. 로우패스 필터드 필.
+          final atk = _attack(t, 6);
+          final v = sin(w * t) * 1.00 +
+              sin(w * 2 * t + 0.20) * 0.32 * exp(-t * 3) +
+              sin(w * 0.5 * t) * 0.38;
+          return v * env * atk * 1.00;
+        }
       case _ToneType.chime:
-        return (sin(2 * pi * freq * t) +
-                sin(2 * pi * freq * 2 * t) * 0.40 +
-                sin(2 * pi * freq * 3 * t) * 0.30 +
-                sin(2 * pi * freq * 5.04 * t) * 0.20 +
-                sin(2 * pi * freq * 7.01 * t) * 0.10 +
-                sin(2 * pi * freq * 9 * t) * 0.05) *
-            env;
+        {
+          // 청량한 차임. 스트레치 하모닉 + 서브 옥타브 소프트 미러링.
+          final atk = _attack(t, 3);
+          final v = sin(w * t) * 1.00 +
+              sin(w * 2.01 * t) * 0.45 * exp(-t * 2) +
+              sin(w * 3.02 * t) * 0.26 * exp(-t * 3) +
+              sin(w * 5.02 * t) * 0.12 * exp(-t * 5);
+          return v * env * atk * 0.95;
+        }
       case _ToneType.marimba:
-        return (sin(2 * pi * freq * t) +
-                sin(2 * pi * freq * 4 * t) * 0.20 +
-                sin(2 * pi * freq * 9.2 * t) * 0.05) *
-            env *
-            min(1.0, t * 200);
+        {
+          // 목재 타악기. 강한 초기 어택 + 짧은 감쇠 하모닉.
+          final atk = _attack(t, 1);
+          final v = sin(w * t) * 1.00 +
+              sin(w * 4.02 * t) * 0.24 * exp(-t * 12) +
+              sin(w * 9.6 * t) * 0.06 * exp(-t * 20);
+          return v * env * atk * 1.05;
+        }
       case _ToneType.dark:
-        return (sin(2 * pi * freq * t) +
-                sin(2 * pi * freq * 0.5 * t) * 0.30 +
-                sin(2 * pi * freq * 0.998 * t) * 0.18 +
-                sin(2 * pi * freq * 1.5 * t) * 0.10) *
-            env;
+        {
+          // 신비로운 저역대. 인하모닉으로 서서히 흩어지는 오버톤.
+          final atk = _attack(t, 8);
+          final v = sin(w * t) * 1.00 +
+              sin(w * 0.5 * t + 0.5) * 0.34 +
+              sin(w * 1.002 * t) * 0.22 +
+              sin(w * 1.498 * t + 0.8) * 0.12 * exp(-t * 3);
+          return v * env * atk * 0.95;
+        }
     }
   }
 
@@ -385,27 +429,28 @@ class SoundService {
   }
 
   double _impactFor(_ToneType type, double t, double freq, double amp) {
-    final env = exp(-t * 25) * amp;
+    final env = exp(-t * 22) * amp;
     switch (type) {
       case _ToneType.brass:
       case _ToneType.dark:
-        return sin(2 * pi * freq * t * (1.0 + exp(-t * 40) * 3.0)) * env +
-            sin(2 * pi * freq * 0.5 * t) * exp(-t * 12) * amp * 0.4;
+        // 낮은 부밍 임팩트. 피치 벤드 완화로 딱딱함 제거.
+        return sin(2 * pi * freq * t * (1.0 + exp(-t * 45) * 2.2)) * env +
+            sin(2 * pi * freq * 0.5 * t) * exp(-t * 10) * amp * 0.35;
       case _ToneType.bell:
       case _ToneType.chime:
         return (sin(2 * pi * freq * t) +
-                sin(2 * pi * freq * 2.01 * t) * 0.5) *
+                sin(2 * pi * freq * 2.01 * t) * 0.45) *
             env;
       case _ToneType.synth:
         return (sin(2 * pi * freq * t) +
-                sin(2 * pi * freq * 0.5 * t) * 0.6) *
-            exp(-t * 20) *
+                sin(2 * pi * freq * 0.5 * t) * 0.55) *
+            exp(-t * 18) *
             amp;
       case _ToneType.marimba:
         return sin(2 * pi * freq * t) *
-            exp(-t * 30) *
+            exp(-t * 28) *
             amp *
-            min(1.0, t * 500);
+            _attack(t, 1);
     }
   }
 
@@ -576,7 +621,7 @@ class SoundService {
         v += sin(2 * pi * t.topNote * st) * exp(-st * 10) * 0.15;
       }
 
-      samples[i] = (v * 28000).toInt().clamp(-32768, 32767);
+      samples[i] = _softClipToInt16(v * 0.93);
     }
     return _buildWav(samples);
   }
@@ -591,9 +636,9 @@ class SoundService {
       final time = i / _sampleRate;
       final bend = t.pitchBend;
       final bendFreq = freq * (1 + bend - bend * (1 - exp(-time * 50)));
-      final env = exp(-time * t.ballDecay);
+      final env = exp(-time * t.ballDecay) * _softGate(time, dur);
       final v = _rawTone(t.tone, time, bendFreq, env);
-      samples[i] = (v * 30000).toInt().clamp(-32768, 32767);
+      samples[i] = _softClipToInt16(v);
     }
     return _buildWav(samples);
   }
@@ -625,16 +670,34 @@ class SoundService {
         }
       }
 
-      if (time >= 1.4) {
-        final ct = time - 1.4;
-        final padEnv = exp(-ct * 2.0) * 0.15;
+      // 잔향 패드: 짧은 딜레이가 겹치는 것처럼 두 번 발화시켜 공간감 부여.
+      // 진폭은 앞서 겹친 멜로디·kick·pad 와 합산되어 클리핑 위험이 있으므로 낮게 유지.
+      if (time >= 1.35) {
+        final ct = time - 1.35;
+        final padEnv = exp(-ct * 2.0) * 0.09;
         for (final f in [t.scale[0] * 2, t.scale[2] * 2, t.scale[4] * 2]) {
           v += sin(2 * pi * f * ct) * padEnv;
-          v += sin(2 * pi * f * 0.5 * ct) * padEnv * 0.3;
+          v += sin(2 * pi * f * 0.5 * ct) * padEnv * 0.22;
+        }
+      }
+      if (time >= 1.55) {
+        final ct = time - 1.55;
+        final tailEnv = exp(-ct * 3.0) * 0.05;
+        for (final f in [t.scale[0] * 2, t.scale[4] * 2]) {
+          v += sin(2 * pi * f * ct + 0.4) * tailEnv;
         }
       }
 
-      samples[i] = (v * 26000).toInt().clamp(-32768, 32767);
+      // 트랙 전체 헤드룸 확보 - 후반부 하드 클리핑 방지.
+      // 최종 30 ms 는 부드러운 릴리즈 페이드로 마무리 pop 제거.
+      double tailFade = 1.0;
+      const tailStart = 1.97;
+      if (time > tailStart) {
+        final f = (dur - time) / (dur - tailStart);
+        tailFade = f < 0 ? 0 : f;
+      }
+
+      samples[i] = _softClipToInt16(v * 0.55 * tailFade);
     }
     return _buildWav(samples);
   }
@@ -669,7 +732,7 @@ class SoundService {
         v += sin(2 * pi * t.rootLow * 1.5 * st) * env * 0.5;
       }
 
-      samples[i] = (v * 30000).toInt().clamp(-32768, 32767);
+      samples[i] = _softClipToInt16(v * 0.95);
     }
     return _buildWav(samples);
   }
@@ -721,7 +784,7 @@ class SoundService {
         }
       }
 
-      samples[i] = (v * 28000).toInt().clamp(-32768, 32767);
+      samples[i] = _softClipToInt16(v * 0.90);
     }
     return _buildWav(samples);
   }
@@ -736,9 +799,9 @@ class SoundService {
       final time = i / _sampleRate;
       final freq = baseFreq * exp(-time * 4);
       final env = exp(-time * 4);
-      final v = _rawTone(t.tone, time, freq, env * 0.6) +
-          sin(2 * pi * freq * 0.5 * time) * env * 0.35;
-      samples[i] = (v * 28000).toInt().clamp(-32768, 32767);
+      final v = _rawTone(t.tone, time, freq, env * 0.55) +
+          sin(2 * pi * freq * 0.5 * time) * env * 0.30;
+      samples[i] = _softClipToInt16(v * 0.90);
     }
     return _buildWav(samples);
   }
@@ -746,18 +809,19 @@ class SoundService {
   // ─── Bounce: ball collision pop ─────────────────────
 
   Uint8List _genBounce(GameType g, _ThemeData t) {
-    const dur = 0.1;
+    const dur = 0.12;
     final n = (_sampleRate * dur).toInt();
     final samples = List<int>.filled(n, 0);
     final freq = t.scale[3] * 2;
 
     for (int i = 0; i < n; i++) {
       final time = i / _sampleRate;
-      final env = exp(-time * 60);
-      double v = sin(2 * pi * 2500 * time) * exp(-time * 200) * 0.4;
-      v += _rawTone(t.tone, time, freq, env * 0.6);
-      v += sin(2 * pi * freq * 0.5 * time) * env * 0.2;
-      samples[i] = (v * 28000).toInt().clamp(-32768, 32767);
+      final env = exp(-time * 45) * _softGate(time, dur);
+      // 밝은 상단 스파클을 짧고 부드럽게. 이전의 2500Hz 하드 클릭 제거.
+      double v = sin(2 * pi * freq * 4 * time) * exp(-time * 140) * 0.18;
+      v += _rawTone(t.tone, time, freq, env * 0.55);
+      v += sin(2 * pi * freq * 0.5 * time) * env * 0.18;
+      samples[i] = _softClipToInt16(v * 0.88);
     }
     return _buildWav(samples);
   }
@@ -765,7 +829,7 @@ class SoundService {
   // ─── Whoosh: upward launch sweep ──────────────────
 
   Uint8List _genWhoosh(GameType g, _ThemeData t) {
-    const dur = 0.3;
+    const dur = 0.32;
     final n = (_sampleRate * dur).toInt();
     final samples = List<int>.filled(n, 0);
 
@@ -774,12 +838,14 @@ class SoundService {
       final progress = time / dur;
       final freq =
           t.rootLow * 2 + (t.topNote - t.rootLow * 2) * progress * progress;
-      final env = sin(pi * progress) * 0.5;
+      // sine^2 shape 로 좀 더 부드러운 스윕
+      final shape = sin(pi * progress);
+      final env = shape * shape * 0.55 * _softGate(time, dur);
       double v = sin(2 * pi * freq * time) * env;
-      v += sin(2 * pi * freq * 1.003 * time) * env * 0.5;
-      v += sin(2 * pi * freq * 2.01 * time) * env * 0.2;
-      v += sin(2 * pi * freq * 0.498 * time) * env * 0.3;
-      samples[i] = (v * 20000).toInt().clamp(-32768, 32767);
+      v += sin(2 * pi * freq * 1.003 * time) * env * 0.45;
+      v += sin(2 * pi * freq * 2.01 * time) * env * 0.15;
+      v += sin(2 * pi * freq * 0.498 * time) * env * 0.25;
+      samples[i] = _softClipToInt16(v * 0.75);
     }
     return _buildWav(samples);
   }
@@ -792,39 +858,79 @@ class SoundService {
     final samples = List<int>.filled(n, 0);
     final rng = Random(42);
 
+    // 이전보다 낮은 밀도 + 좀 더 긴 티링(35 ms).
     final clicks = <(double, double)>[];
-    double ct = 0.03;
-    while (ct < dur - 0.03) {
-      final clickFreq = t.scale[rng.nextInt(7)] * (1.0 + rng.nextDouble() * 0.5);
+    double ct = 0.05;
+    while (ct < dur - 0.05) {
+      final clickFreq =
+          t.scale[rng.nextInt(7)] * (1.5 + rng.nextDouble() * 0.7);
       clicks.add((ct, clickFreq));
-      ct += 0.03 + rng.nextDouble() * 0.06;
+      ct += 0.05 + rng.nextDouble() * 0.09;
     }
 
     for (int i = 0; i < n; i++) {
       final time = i / _sampleRate;
       double v = 0;
 
+      // 100 ms crossfade in/out
       double fade = 1.0;
-      if (time < 0.05) fade = time / 0.05;
-      if (time > dur - 0.05) fade = (dur - time) / 0.05;
+      if (time < 0.10) fade = time / 0.10;
+      if (time > dur - 0.10) fade = (dur - time) / 0.10;
 
-      v += sin(2 * pi * t.rootLow * time) * 0.12;
-      v += sin(2 * pi * t.rootLow * 1.5 * time) * 0.06;
+      // 은은한 저역 텀블링 베드
+      v += sin(2 * pi * t.rootLow * time) * 0.09;
+      v += sin(2 * pi * t.rootLow * 1.5 * time) * 0.05;
       v += sin(2 * pi * t.rootLow * 3.17 * time +
               sin(2 * pi * 5 * time) * 2) *
-          0.08;
+          0.06;
 
       for (final (clickTime, clickFreq) in clicks) {
-        if (time >= clickTime && time < clickTime + 0.025) {
+        // 티링 길이 35 ms + 부드러운 어택으로 딱딱한 팝 제거
+        if (time >= clickTime && time < clickTime + 0.035) {
           final lt = time - clickTime;
-          v += sin(2 * pi * clickFreq * lt) * exp(-lt * 100) * 0.25;
-          v += sin(2 * pi * clickFreq * 2 * lt) * exp(-lt * 120) * 0.1;
+          final atk = _attack(lt, 2);
+          final decay = exp(-lt * 55);
+          v += sin(2 * pi * clickFreq * lt) * decay * atk * 0.18;
+          v += sin(2 * pi * clickFreq * 2.01 * lt) * decay * atk * 0.09;
+          v += sin(2 * pi * clickFreq * 3.03 * lt) * exp(-lt * 90) * 0.04;
         }
       }
 
-      samples[i] = (v * fade * 22000).toInt().clamp(-32768, 32767);
+      samples[i] = _softClipToInt16(v * fade * 0.72);
     }
     return _buildWav(samples);
+  }
+
+  // ─── Envelope & Saturation Helpers ───────────────────
+
+  /// 노트 시작/끝의 클릭 노이즈를 제거하는 부드러운 게이트
+  /// (5 ms attack + 10 ms release)
+  double _softGate(double t, double duration) {
+    const attack = 0.005;
+    const release = 0.010;
+    double a = 1.0;
+    if (t < attack) {
+      a = t / attack;
+    }
+    final rStart = duration - release;
+    if (t > rStart) {
+      final r = (duration - t) / release;
+      a *= r < 0 ? 0 : r;
+    }
+    return a;
+  }
+
+  /// 부드러운 리미팅. tanh 근사식 `x / (1 + |x|·k)` 사용.
+  /// 딱딱한 clamp 대신 warm 한 소프트 클립을 제공한다.
+  /// k 를 낮게 유지해 초선형 영역을 넓혀 음량 손실을 최소화한다.
+  int _softClipToInt16(double x) {
+    if (x.isNaN || x.isInfinite) return 0;
+    final soft = x / (1.0 + x.abs() * 0.15);
+    final v = soft * 32000;
+    if (v.isNaN || v.isInfinite) return 0;
+    if (v > 32767) return 32767;
+    if (v < -32768) return -32768;
+    return v.toInt();
   }
 
   // ─── WAV Builder ─────────────────────────────────────

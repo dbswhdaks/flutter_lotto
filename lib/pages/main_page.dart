@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'lotto_home_page.dart';
 import 'lotto_store_page.dart';
 import 'pension_page.dart';
@@ -10,6 +11,8 @@ import 'tripleluck_page.dart';
 import 'doublejack_page.dart';
 import 'treasure_page.dart';
 import 'catchme_page.dart';
+import 'winning_number_page.dart';
+import 'pension_winning_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -324,108 +327,139 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
   Widget _buildTitle() {
     return SizedBox(
-      height: 56,
+      height: 76,
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFFFFC93C), Color(0xFFF5A623), Color(0xFFFF6B6B)],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFF5A623).withValues(alpha: 0.45),
-                  blurRadius: 20,
-                  spreadRadius: -2,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: const Center(
-              child: Text('🎯', style: TextStyle(fontSize: 22)),
-            ),
-          ),
-          const SizedBox(width: 12),
+          _buildMenuButton(),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                ShaderMask(
-                  shaderCallback: (rect) => const LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      Color(0xFFFFE08A),
-                      Color(0xFFF5A623),
-                      Color(0xFFFF8A65),
-                    ],
-                  ).createShader(rect),
-                  child: const FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Lotto 번호 통계 분석',
-                      maxLines: 1,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Row(
-                  children: [
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: const Color(0xFF4FD1C5),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(
-                              0xFF4FD1C5,
-                            ).withValues(alpha: 0.7),
-                            blurRadius: 6,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    const Text(
-                      '오늘의 행운 도전!',
-                      style: TextStyle(
-                        color: Color(0xFF4FD1C5),
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.3,
-                      ),
+                _buildTitleText(),
+                const SizedBox(height: 6),
+                _buildSubtitleBadge(),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          _buildShareButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTitleText() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const Icon(
+          Icons.auto_awesome,
+          color: Color(0xFFFFE08A),
+          size: 14,
+        ),
+        const SizedBox(width: 6),
+        Flexible(
+          child: ShaderMask(
+            shaderCallback: (rect) => const LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [
+                Color(0xFFFFE08A),
+                Color(0xFFF5A623),
+                Color(0xFFFF8A65),
+              ],
+            ).createShader(rect),
+            child: const FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.center,
+              child: Text(
+                'Lotto 번호 통계 분석',
+                maxLines: 1,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 23,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.5,
+                  shadows: [
+                    Shadow(
+                      color: Color(0x66F5A623),
+                      blurRadius: 16,
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
-          const SizedBox(width: 8),
-          _buildShareButton(),
-          const SizedBox(width: 8),
-          _buildMenuButton(),
+        ),
+        const SizedBox(width: 6),
+        const Icon(
+          Icons.auto_awesome,
+          color: Color(0xFFFF8A65),
+          size: 14,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSubtitleBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        gradient: LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            const Color(0xFF4FD1C5).withValues(alpha: 0.22),
+            const Color(0xFF4FD1C5).withValues(alpha: 0.08),
+          ],
+        ),
+        border: Border.all(
+          color: const Color(0xFF4FD1C5).withValues(alpha: 0.45),
+          width: 0.9,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF4FD1C5).withValues(alpha: 0.20),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.stars_rounded,
+            color: Color(0xFF4FD1C5),
+            size: 13,
+          ),
+          const SizedBox(width: 5),
+          const Text(
+            '오늘의 행운 도전!',
+            style: TextStyle(
+              color: Color(0xFF7FE9DF),
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.3,
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildShareButton() {
-    return GestureDetector(
+    return _buildIconButton(
+      icon: Icons.share_rounded,
+      accentColor: const Color(0xFFF5A623),
       onTap: () {
         SharePlus.instance.share(
           ShareParams(
@@ -435,72 +469,80 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
           ),
         );
       },
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.white.withValues(alpha: 0.10),
-              Colors.white.withValues(alpha: 0.03),
-            ],
-          ),
-          border: Border.all(
-            color: const Color(0xFFF5A623).withValues(alpha: 0.40),
-            width: 1.2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFF5A623).withValues(alpha: 0.18),
-              blurRadius: 14,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: const Icon(
-          Icons.share_rounded,
-          color: Color(0xFFF5A623),
-          size: 18,
-        ),
-      ),
     );
   }
 
   Widget _buildMenuButton() {
-    return GestureDetector(
+    return _buildIconButton(
+      icon: Icons.menu_rounded,
+      accentColor: const Color(0xFF4FD1C5),
       onTap: _openMenuSheet,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.white.withValues(alpha: 0.10),
-              Colors.white.withValues(alpha: 0.03),
+    );
+  }
+
+  Widget _buildIconButton({
+    required IconData icon,
+    required Color accentColor,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        splashColor: accentColor.withValues(alpha: 0.20),
+        highlightColor: accentColor.withValues(alpha: 0.08),
+        child: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                accentColor.withValues(alpha: 0.22),
+                accentColor.withValues(alpha: 0.06),
+                Colors.white.withValues(alpha: 0.02),
+              ],
+            ),
+            border: Border.all(
+              color: accentColor.withValues(alpha: 0.55),
+              width: 1.2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: accentColor.withValues(alpha: 0.30),
+                blurRadius: 18,
+                spreadRadius: -2,
+                offset: const Offset(0, 6),
+              ),
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.25),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
             ],
           ),
-          border: Border.all(
-            color: const Color(0xFF4FD1C5).withValues(alpha: 0.40),
-            width: 1.2,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      Colors.white.withValues(alpha: 0.10),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+              Icon(icon, color: accentColor, size: 20),
+            ],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF4FD1C5).withValues(alpha: 0.18),
-              blurRadius: 14,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: const Icon(
-          Icons.menu_rounded,
-          color: Color(0xFF4FD1C5),
-          size: 18,
         ),
       ),
     );
@@ -546,8 +588,11 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (sheetCtx) {
+        final maxHeight = MediaQuery.of(sheetCtx).size.height * 0.85;
         return Container(
+          constraints: BoxConstraints(maxHeight: maxHeight),
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
@@ -556,12 +601,12 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
             ),
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
           child: SafeArea(
             top: false,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                const SizedBox(height: 12),
                 Container(
                   width: 44,
                   height: 4,
@@ -570,52 +615,139 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                const SizedBox(height: 18),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    '메뉴',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.55),
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13,
-                      letterSpacing: 0.5,
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            '메뉴',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.55),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        _MenuTile(
+                          icon: Icons.confirmation_number_rounded,
+                          iconColor: const Color(0xFFFFB300),
+                          title: '로또 당첨번호 확인하기',
+                          subtitle: '회차별 조회 + QR 코드 스캔',
+                          onTap: () {
+                            Navigator.of(sheetCtx).pop();
+                            _navigateTo(const WinningNumberPage());
+                          },
+                        ),
+                        const SizedBox(height: 10),
+                        _MenuTile(
+                          icon: Icons.monetization_on_rounded,
+                          iconColor: const Color(0xFFFF8C00),
+                          title: '연금복권 당첨번호 확인하기',
+                          subtitle: '연금복권 720+ 회차별 조회',
+                          onTap: () {
+                            Navigator.of(sheetCtx).pop();
+                            _navigateTo(const PensionWinningPage());
+                          },
+                        ),
+                        const SizedBox(height: 10),
+                        _MenuTile(
+                          icon: Icons.storefront_rounded,
+                          iconColor: const Color(0xFFF5A623),
+                          title: '로또 판매점 찾기',
+                          subtitle: '내 위치 기준 거리순 + 길찾기 연결',
+                          onTap: () {
+                            Navigator.of(sheetCtx).pop();
+                            _navigateTo(const LottoStorePage());
+                          },
+                        ),
+                        const SizedBox(height: 20),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            '추천 앱',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.55),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        _MenuTile(
+                          icon: Icons.emoji_events_rounded,
+                          iconColor: const Color(0xFFD97706),
+                          title: '경마 Plus',
+                          subtitle: 'AI 경마예상 · 실시간 경주결과',
+                          onTap: () {
+                            Navigator.of(sheetCtx).pop();
+                            _launchStore(
+                              'https://play.google.com/store/apps/details?id=com.horseracingplus.app',
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 10),
+                        _MenuTile(
+                          icon: Icons.pedal_bike_rounded,
+                          iconColor: const Color(0xFF3B82F6),
+                          title: '경륜 Plus',
+                          subtitle: '실시간 경륜정보 및 경기 결과',
+                          onTap: () {
+                            Navigator.of(sheetCtx).pop();
+                            _launchStore(
+                              'https://play.google.com/store/apps/details?id=com.gyeongryunplus.app',
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 10),
+                        _MenuTile(
+                          icon: Icons.directions_boat_rounded,
+                          iconColor: const Color(0xFF06B6D4),
+                          title: '경정 Plus',
+                          subtitle: '출주표 · AI 상세분석 및 예상 · 결과정보',
+                          onTap: () {
+                            Navigator.of(sheetCtx).pop();
+                            _launchStore(
+                              'https://play.google.com/store/apps/details?id=com.boat_racing',
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                const SizedBox(height: 10),
-                _MenuTile(
-                  icon: Icons.storefront_rounded,
-                  iconColor: const Color(0xFFF5A623),
-                  title: '로또 판매점 찾기',
-                  subtitle: '내 위치 기준 거리순 + 길찾기 연결',
-                  onTap: () {
-                    Navigator.of(sheetCtx).pop();
-                    _navigateTo(const LottoStorePage());
-                  },
-                ),
-                const SizedBox(height: 10),
-                _MenuTile(
-                  icon: Icons.share_rounded,
-                  iconColor: const Color(0xFF4FD1C5),
-                  title: '앱 공유하기',
-                  subtitle: '친구에게 추천하기',
-                  onTap: () {
-                    Navigator.of(sheetCtx).pop();
-                    SharePlus.instance.share(
-                      ShareParams(
-                        text:
-                            '🎯 Lotto 번호 통계 분석으로 행운의 번호를 뽑아보세요!\n'
-                            '로또 6/45, 연금복권, 파워볼 등 다양한 복권 번호를 통계 기반으로 추천해드립니다.',
-                      ),
-                    );
-                  },
                 ),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Future<void> _launchStore(String url) async {
+    final uri = Uri.parse(url);
+    try {
+      final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!ok && mounted) {
+        _showLaunchError();
+      }
+    } catch (_) {
+      if (mounted) _showLaunchError();
+    }
+  }
+
+  void _showLaunchError() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('스토어를 열 수 없습니다'),
+        duration: Duration(seconds: 2),
+      ),
     );
   }
 }
